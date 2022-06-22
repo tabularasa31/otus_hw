@@ -11,14 +11,19 @@ type Words struct {
 }
 
 func Top10(s string) []string {
-	w := []Words{}
-	wordMap := make(map[string]int)
-
-	for _, word := range strings.Fields(s) {
-		wordMap[word]++
+	if len(s) == 0 {
+		return []string{}
 	}
 
-	for key, val := range wordMap {
+	wordsMap := make(map[string]int)
+
+	for _, word := range strings.Fields(s) {
+		wordsMap[word]++
+	}
+
+	w := make([]Words, 0, len(wordsMap))
+
+	for key, val := range wordsMap {
 		w = append(w, Words{key, val})
 	}
 
@@ -26,10 +31,10 @@ func Top10(s string) []string {
 		return w[i].Count > w[j].Count || (w[i].Count == w[j].Count && (strings.Compare(w[i].Word, w[j].Word) < 0))
 	})
 
-	res := []string{}
+	res := make([]string, 0, 10)
 
-	for _, val := range w {
-		res = append(res, val.Word)
+	for i := 0; i < len(w) && i < 11; i++ {
+		res = append(res, w[i].Word)
 	}
 
 	if len(res) < 11 {
