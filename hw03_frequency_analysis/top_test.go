@@ -99,5 +99,4 @@ func TestTop10(t *testing.T) {
 		}
 		require.Equal(t, expected, Top10(nums))
 	})
-
 }
