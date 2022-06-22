@@ -26,14 +26,6 @@ func Top10(s string) []string {
 		return w[i].Count > w[j].Count || (w[i].Count == w[j].Count && (strings.Compare(w[i].Word, w[j].Word) < 0))
 	})
 
-	//sort.Slice(w, func(i, j int) bool {
-	//	return w[i].Word < w[j].Word
-	//})
-	//
-	//sort.SliceStable(w, func(i, j int) bool {
-	//	return w[i].Count > w[j].Count
-	//})
-
 	res := []string{}
 
 	for _, val := range w {
