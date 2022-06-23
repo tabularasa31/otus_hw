@@ -28,7 +28,7 @@ func Unpack(s string) (string, error) {
 			// Если первый символ цифра или две цифры подряд и перед ними нет экранирования
 			if i == 0 || unicode.IsDigit(r[i-1]) && r[i-2] != '\\' {
 				return "", ErrInvalidString
-			} else if !unicode.IsDigit(r[i-1]) || unicode.IsDigit(r[i-1]) && string(r[i-2]) == "\\" {
+			} else if !unicode.IsDigit(r[i-1]) || unicode.IsDigit(r[i-1]) && r[i-2] == '\\' {
 				// Если цифра, а перед ней буква или две цифры подряд и перед ними есть экранирование
 				n, err := strconv.Atoi(string(r[i]))
 				if err != nil {
