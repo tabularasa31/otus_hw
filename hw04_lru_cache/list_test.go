@@ -1,14 +1,15 @@
-package hw04lrucache
+package hw04lrucache_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	lru "github.com/tabularasa31/hw_otus/hw04_lru_cache"
 )
 
 func TestList(t *testing.T) {
 	t.Run("empty list", func(t *testing.T) {
-		l := NewList()
+		l := lru.NewList()
 
 		require.Equal(t, 0, l.Len())
 		require.Nil(t, l.Front())
@@ -16,7 +17,7 @@ func TestList(t *testing.T) {
 	})
 
 	t.Run("complex", func(t *testing.T) {
-		l := NewList()
+		l := lru.NewList()
 
 		l.PushFront(10) // [10]
 		l.PushBack(20)  // [10, 20]

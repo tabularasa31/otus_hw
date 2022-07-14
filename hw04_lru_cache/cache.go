@@ -1,5 +1,7 @@
 package hw04lrucache
 
+import "sync"
+
 type Key string
 
 type Cache interface {
@@ -9,16 +11,10 @@ type Cache interface {
 }
 
 type lruCache struct {
-	Cache // Remove me after realization.
-
 	capacity int
 	queue    List
 	items    map[Key]*ListItem
-}
-
-type cacheItem struct {
-	key   Key
-	value interface{}
+	mu       sync.Mutex
 }
 
 func NewCache(capacity int) Cache {
@@ -27,4 +23,48 @@ func NewCache(capacity int) Cache {
 		queue:    NewList(),
 		items:    make(map[Key]*ListItem, capacity),
 	}
+}
+
+func (l *lruCache) Set(key Key, value interface{}) bool {
+	/*
+		если элемент присутствует в словаре, то обновить его значение и переместить элемент в начало очереди;
+		если элемента нет в словаре, то добавить в словарь и в начало очереди (при этом, если размер очереди
+		больше ёмкости кэша, то необходимо удалить последний элемент из очереди и его значение из словаря);
+		возвращаемое значение - флаг, присутствовал ли элемент в кэше.
+	*/
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if _, ok := l.items[key]; ok {
+		l.items[key].Value = value
+		l.queue.MoveToFront(l.items[key])
+		return true
+	}
+	l.items[key] = l.queue.PushFront(value)
+	if l.queue.Len() > l.capacity {
+		l.queue.Remove(l.queue.Back())
+	}
+
+	return false
+}
+
+func (l *lruCache) Get(key Key) (interface{}, bool) {
+	/*
+		если элемент присутствует в словаре, то переместить элемент в начало очереди и вернуть его значение и true;
+		если элемента нет в словаре, то вернуть nil и false (работа с кешом похожа на работу с map)
+	*/
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	if ci, ok := l.items[key]; ok {
+		l.queue.MoveToFront(ci)
+		return ci.Value, true
+	}
+	return nil, false
+}
+
+func (l *lruCache) Clear() {
+	// l = &lruCache{}
+	l.queue = NewList()
+	l.items = make(map[Key]*ListItem, l.capacity)
 }
