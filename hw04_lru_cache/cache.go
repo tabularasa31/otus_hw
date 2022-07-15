@@ -10,6 +10,11 @@ type Cache interface {
 	Clear()
 }
 
+type cacheItem struct {
+	key   Key
+	value interface{}
+}
+
 type lruCache struct {
 	capacity int
 	queue    List
@@ -25,7 +30,7 @@ func NewCache(capacity int) Cache {
 	}
 }
 
-func (l *lruCache) Set(key Key, value interface{}) bool {
+func (l *lruCache) Set(key Key, v interface{}) bool {
 	/*
 		если элемент присутствует в словаре, то обновить его значение и переместить элемент в начало очереди;
 		если элемента нет в словаре, то добавить в словарь и в начало очереди (при этом, если размер очереди
@@ -36,14 +41,17 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 	defer l.mu.Unlock()
 
 	if _, ok := l.items[key]; ok {
-		l.items[key].Value = value
 		l.queue.MoveToFront(l.items[key])
+		l.items[key].Value = &cacheItem{key: key, value: v}
 		return true
 	}
-	l.items[key] = l.queue.PushFront(value)
-	if l.queue.Len() > l.capacity {
+
+	if l.queue.Len() == l.capacity {
+		delete(l.items, l.queue.Back().Value.(*cacheItem).key)
 		l.queue.Remove(l.queue.Back())
 	}
+
+	l.items[key] = l.queue.PushFront(&cacheItem{key: key, value: v})
 
 	return false
 }
@@ -56,9 +64,11 @@ func (l *lruCache) Get(key Key) (interface{}, bool) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
-	if ci, ok := l.items[key]; ok {
-		l.queue.MoveToFront(ci)
-		return ci.Value, true
+	if _, ok := l.items[key]; ok {
+		l.queue.MoveToFront(l.items[key])
+		l.items[key] = l.queue.Front()
+		res := l.items[key].Value.(*cacheItem).value
+		return res, true
 	}
 	return nil, false
 }

@@ -62,6 +62,18 @@ func TestCache(t *testing.T) {
 		_, ok = c.Get("bbb")
 		require.False(t, ok)
 	})
+
+	t.Run("push logic", func(t *testing.T) {
+		c := lru.NewCache(3)
+		_ = c.Set("aaa", 100)
+		_ = c.Set("bbb", 200)
+		_ = c.Set("ccc", 300)
+		_ = c.Set("ddd", 400)
+		_ = c.Set("fff", 500)
+
+		_, ok := c.Get("aaa")
+		require.False(t, ok)
+	})
 }
 
 func TestCacheMultithreading(t *testing.T) {

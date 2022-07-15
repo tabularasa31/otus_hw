@@ -43,8 +43,9 @@ func (l *list) Back() *ListItem {
 
 // PushFront добавить значение в начало.
 func (l *list) PushFront(v interface{}) *ListItem {
-	newItem := &ListItem{Value: v, Next: l.head, Prev: nil}
+	newItem := &ListItem{Value: v}
 	if l.head != nil {
+		newItem.Next = l.head
 		l.head.Prev = newItem
 	} else {
 		l.tail = newItem
@@ -70,25 +71,25 @@ func (l *list) PushBack(v interface{}) *ListItem {
 
 // Remove удалить элемент.
 func (l *list) Remove(i *ListItem) {
-	switch {
-	case i == l.head:
-		i.Next.Prev = nil
+	if i.Prev == nil {
 		l.head = i.Next
-	case i == l.tail:
-		i.Prev.Next = nil
-		l.tail = i.Prev
-	default:
-		i.Next.Prev = i.Prev
+		i.Next.Prev = nil
+	} else {
 		i.Prev.Next = i.Next
 	}
-	//	i = nil
+
+	if i.Next == nil {
+		l.tail = i.Prev
+		i.Prev.Next = nil
+	} else {
+		i.Next.Prev = i.Prev
+	}
+
 	l.length--
 }
 
 // MoveToFront переместить элемент в начало.
 func (l *list) MoveToFront(i *ListItem) {
 	l.Remove(i)
-
-	l.head.Prev, i.Next, l.head = i, l.head, i
-	l.length++
+	l.PushFront(i.Value)
 }
