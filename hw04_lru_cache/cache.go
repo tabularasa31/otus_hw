@@ -42,7 +42,8 @@ func (l *lruCache) Set(key Key, v interface{}) bool {
 
 	if _, ok := l.items[key]; ok {
 		l.queue.MoveToFront(l.items[key])
-		l.items[key].Value = &cacheItem{key: key, value: v}
+		l.queue.Front().Value = &cacheItem{key: key, value: v}
+		l.items[key].Value = l.queue.Front().Value
 		return true
 	}
 
