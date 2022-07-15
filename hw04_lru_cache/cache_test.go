@@ -73,6 +73,13 @@ func TestCache(t *testing.T) {
 
 		_, ok := c.Get("aaa")
 		require.False(t, ok)
+
+		_ = c.Set("fff", 555)
+		_ = c.Set("ccc", 333)
+		_ = c.Set("ggg", 666)
+
+		_, ok = c.Get("ddd")
+		require.False(t, ok)
 	})
 }
 
