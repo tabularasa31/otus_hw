@@ -8,6 +8,7 @@ type (
 
 type Stage func(in In) (out Out)
 
+//TODO: need to finish
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
 	out := in
 	select {
