@@ -14,7 +14,6 @@ var (
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
-
 	srcFile, err := os.Open(fromPath)
 	if err != nil {
 		if os.IsNotExist(err) {

@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/stretchr/testify/require"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestCopy(t *testing.T) {
@@ -22,8 +24,8 @@ func TestCopy(t *testing.T) {
 	}()
 
 	tmpfile := filepath.Join(dir, "tmpfile")
-	if err := os.WriteFile(tmpfile, []byte("content"), 0666); err != nil {
-		log.Fatal(err)
+	if err := os.WriteFile(tmpfile, []byte("content"), 0o666); err != nil {
+		fmt.Printf("failed to write temp file: %q", err)
 	}
 	srcFile, _ := os.Open("testdata/input.txt")
 	sf, _ := srcFile.Stat()
