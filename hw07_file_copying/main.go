@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"io"
 )
 
 var (
@@ -18,5 +20,9 @@ func init() {
 
 func main() {
 	flag.Parse()
-	// Place your code here.
+
+	if err := Copy(from, to, offset, limit); err != nil && err != io.EOF {
+		fmt.Println("error to copy file: %w", err)
+	}
+
 }
