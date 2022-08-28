@@ -63,14 +63,9 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return err
 	}
 
-	_, err = io.CopyN(dstFile, srcFile, limit)
-	if err != nil {
-		return err
-	}
-
 	fmt.Printf("Coping file %v to file %v\n", fromPath, toPath)
 
-	tmpl := ` {{rtime . "%s remain"}} {{bar . "<" "oOo" "|" "~" ">"}} {{speed . | rndcolor }} {{percent .}}`
+	tmpl := `{{rtime . "%s remain"}} {{bar . "<" "oOo" "|" "~" ">"}} {{speed . | rndcolor }} {{percent .}}`
 
 	bar := pb.ProgressBarTemplate(tmpl).Start64(limit)
 	barReader := bar.NewProxyReader(srcFile)
