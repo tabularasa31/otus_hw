@@ -24,6 +24,6 @@ func main() {
 
 	err := Copy(from, to, offset, limit)
 	if err != nil && !errors.Is(err, io.EOF) {
-		fmt.Println("error to copy file: %w", err)
+		fmt.Println("error to copy file:", err)
 	}
 }

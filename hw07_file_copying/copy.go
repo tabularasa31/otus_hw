@@ -6,6 +6,8 @@ import (
 	"io"
 	"log"
 	"os"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 var (
@@ -17,7 +19,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	srcFile, err := os.Open(fromPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return fmt.Errorf("file %v is not exist", fromPath)
+			return fmt.Errorf("file %q is not exist", fromPath)
 		}
 		return fmt.Errorf("failed to open file %v, error: %w", fromPath, err)
 	}
@@ -65,6 +67,20 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Printf("Coping file %v to file %v\n", fromPath, toPath)
+
+	tmpl := ` {{rtime . "%s remain"}} {{bar . "<" "oOo" "|" "~" ">"}} {{speed . | rndcolor }} {{percent .}}`
+
+	bar := pb.ProgressBarTemplate(tmpl).Start64(limit)
+	barReader := bar.NewProxyReader(srcFile)
+
+	_, err = io.CopyN(dstFile, barReader, limit)
+	if err != nil && !errors.Is(err, io.EOF) {
+		return err
+	}
+
+	bar.Finish()
 
 	return nil
 }
