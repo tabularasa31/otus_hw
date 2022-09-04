@@ -33,19 +33,18 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 
 	dstFile, err := os.Create(toPath)
 	if err != nil {
-		return fmt.Errorf("unable to create file %v, error: %w", toPath, err)
+		return fmt.Errorf("create file '%v': %w", toPath, err)
 	}
 
 	defer func() {
 		if e := dstFile.Close(); e != nil {
 			log.Fatalf("failed to close file %v, error: %q", toPath, e)
-			return
 		}
 	}()
 
 	sf, err := srcFile.Stat()
 	if err != nil {
-		return err
+		return fmt.Errorf("get file info: %w", err)
 	}
 	if sf.Size() < offset { // offset больше, чем размер файла - невалидная ситуация
 		return ErrOffsetExceedsFileSize
