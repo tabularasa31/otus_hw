@@ -31,9 +31,10 @@ func ReadDir(dir string) (Environment, error) {
 		if file.IsDir() {
 			continue
 		}
-		if strings.Contains(file.Name(), "=") {
+		if strings.Contains(file.Name(), "=") { // имя не должно содержать "="
 			continue
 		}
+
 		fpath := filepath.Join(dir, file.Name())
 
 		val, err := ReadFile(fpath)
@@ -46,7 +47,7 @@ func ReadDir(dir string) (Environment, error) {
 			return nil, err
 		}
 
-		if fi.Size() == 0 {
+		if fi.Size() == 0 { // если файл полностью пустой (длина - 0 байт), то удаляет переменную окружения
 			env[file.Name()] = EnvValue{
 				Value:      "",
 				NeedRemove: true,
@@ -79,8 +80,8 @@ func ReadFile(fpath string) (string, error) {
 		return "", err
 	}
 
-	val = strings.ReplaceAll(val, "\x00", "\n")
-	val = strings.TrimRight(val, " \n\t\r")
+	val = strings.ReplaceAll(val, "\x00", "\n") // терминальные нули (0x00) заменяются на перевод строки (\n)
+	val = strings.TrimRight(val, " \n\t\r")     // пробелы и табуляция в конце удаляются
 
 	return val, nil
 }
