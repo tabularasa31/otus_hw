@@ -90,6 +90,8 @@ func (l *list) Remove(i *ListItem) {
 
 // MoveToFront переместить элемент в начало.
 func (l *list) MoveToFront(i *ListItem) {
-	l.Remove(i)
-	l.PushFront(i.Value)
+	if i.Value != l.head {
+		l.Remove(i)
+		l.PushFront(i.Value)
+	}
 }
