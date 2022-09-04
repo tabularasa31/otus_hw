@@ -21,24 +21,19 @@ type EnvValue struct {
 // ReadDir reads a specified directory and returns map of env variables.
 // Variables represented as files where filename is name of variable, file first line is a value.
 func ReadDir(dir string) (Environment, error) {
-
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
 
 	env := make(Environment, len(files))
-
 	for _, file := range files {
-
 		if file.IsDir() {
 			continue
 		}
-
 		if strings.Contains(file.Name(), "=") {
 			continue
 		}
-
 		fpath := filepath.Join(dir, file.Name())
 
 		val, err := ReadFile(fpath)
@@ -67,7 +62,6 @@ func ReadDir(dir string) (Environment, error) {
 }
 
 func ReadFile(fpath string) (string, error) {
-
 	f, err := os.Open(fpath)
 	if err != nil {
 		return "", err
@@ -84,7 +78,7 @@ func ReadFile(fpath string) (string, error) {
 		return "", err
 	}
 
-	strings.ReplaceAll(val, "\x00", "\n")
+	val = strings.ReplaceAll(val, "\x00", "\n")
 	val = strings.TrimRight(val, " \n\t\r")
 
 	return val, nil

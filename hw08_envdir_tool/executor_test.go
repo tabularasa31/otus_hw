@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestRunCmd(t *testing.T) {
-
 	t.Run("invalid command", func(t *testing.T) {
 		code := RunCmd([]string{"invalid"}, Environment{})
 		require.NotEqual(t, 0, code)
@@ -23,5 +23,4 @@ func TestRunCmd(t *testing.T) {
 		require.Equal(t, 0, code)
 		require.Contains(t, os.Environ(), "TEST=My test env")
 	})
-
 }

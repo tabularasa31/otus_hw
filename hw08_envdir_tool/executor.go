@@ -8,7 +8,6 @@ import (
 
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
 func RunCmd(cmd []string, env Environment) (returnCode int) {
-
 	for k, v := range env {
 		err := os.Unsetenv(k)
 		if err != nil {
@@ -24,7 +23,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 		}
 	}
 
-	command := exec.Command(cmd[0], cmd[1:]...)
+	command := exec.Command(cmd[0], cmd[1:]...) // #nosec G204
 	command.Stdout = os.Stdout
 
 	if err := command.Run(); err != nil {
