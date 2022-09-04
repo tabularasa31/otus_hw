@@ -51,6 +51,7 @@ func ReadDir(dir string) (Environment, error) {
 				Value:      "",
 				NeedRemove: true,
 			}
+			continue
 		}
 
 		env[file.Name()] = EnvValue{
