@@ -3,6 +3,7 @@ package hw09structvalidator
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -47,6 +48,12 @@ func TestValidate(t *testing.T) {
 		// ...
 		// Place your code here.
 	}
+
+	t.Run("not struct case", func(t *testing.T) {
+		in := "not struct"
+		err := Validate(in)
+		require.EqualError(t, err, ErrNotStruct.Error())
+	})
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
