@@ -8,17 +8,44 @@ type (
 
 type Stage func(in In) (out Out)
 
-//TODO: need to finish
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	out := in
-	select {
-	case <-done:
-		return out
-	case <-in:
-		for _, stage := range stages {
-			out = stage(out)
+	out := doDone(in, done)
+
+	for _, stage := range stages {
+		if stage != nil {
+			out = stage(doDone(out, done))
 		}
 	}
+	return out
+}
 
+func doDone(in, done In) Out {
+	out := make(Bi)
+	go func() {
+		defer func() {
+			close(out)
+			for range in {
+
+			}
+
+		}()
+		for {
+			select {
+			case <-done:
+				return
+			default:
+			}
+			select {
+			case <-done:
+				return
+			case v, ok := <-in:
+				if !ok {
+					return
+				}
+				out <- v
+			}
+		}
+
+	}()
 	return out
 }
