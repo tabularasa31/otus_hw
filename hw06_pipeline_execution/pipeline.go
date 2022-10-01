@@ -25,9 +25,7 @@ func doDone(in, done In) Out {
 		defer func() {
 			close(out)
 			for range in {
-
 			}
-
 		}()
 		for {
 			select {
@@ -45,7 +43,7 @@ func doDone(in, done In) Out {
 				out <- v
 			}
 		}
-
 	}()
+
 	return out
 }
