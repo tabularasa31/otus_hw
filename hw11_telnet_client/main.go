@@ -13,17 +13,16 @@ import (
 )
 
 func main() {
-
 	timeout, addr := handleFlags()
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	client := NewTelnetClient(addr, *timeout, os.Stdin, os.Stdout)
+	client := NewTelnetClient(ctx, addr, *timeout, os.Stdin, os.Stdout)
 	if err := client.Connect(); err != nil {
-		fmt.Fprint(os.Stderr, "...failed to connect, error: %v\n", err)
+		fmt.Fprint(os.Stderr, "...failed to connect, error: %w\n", err)
 	} else {
-		fmt.Fprint(os.Stderr, "...Connected to %v\n", addr)
+		fmt.Fprint(os.Stderr, "...Connected to %w\n", addr)
 	}
 	defer func() {
 		if e := client.Close(); e != nil {
@@ -31,7 +30,7 @@ func main() {
 		}
 	}()
 
-	go recieveRoutine(client, cancel)
+	go receiveRoutine(ctx, client, cancel)
 	go sendRoutine(ctx, client, cancel)
 
 	<-ctx.Done()
@@ -42,25 +41,34 @@ func handleFlags() (timeout *time.Duration, addr string) {
 	flag.Parse()
 
 	if len(flag.Args()) != 2 {
-		log.Fatalf("there are no any command arguments")
+		log.Fatalf("no any command arguments")
 	}
 
 	return timeout, net.JoinHostPort(flag.Arg(0), flag.Arg(1))
 }
 
-func recieveRoutine(client TelnetClient, cancel func()) {
-	err := client.Receive()
-	if err != nil {
-		fmt.Fprint(os.Stderr, "recieving error: %v\n", err)
+func receiveRoutine(ctx context.Context, client TelnetClient, cancel func()) {
+	select {
+	case <-ctx.Done():
+		cancel()
+	default:
+	}
+	if err := client.Receive(); err != nil {
+		fmt.Fprint(os.Stderr, "receiving error: %w\n", err)
 	} else {
 		fmt.Fprint(os.Stderr, "...Connection was closed by peer\n")
 	}
 	defer cancel()
 }
+
 func sendRoutine(ctx context.Context, client TelnetClient, cancel func()) {
-	err := client.Send()
-	if err != nil {
-		fmt.Fprint(os.Stderr, "sending error: %v\n", err)
+	select {
+	case <-ctx.Done():
+		cancel()
+	default:
+	}
+	if err := client.Send(); err != nil {
+		fmt.Fprint(os.Stderr, "sending error: %w\n", err)
 	} else {
 		fmt.Fprint(os.Stderr, "...EOF")
 	}

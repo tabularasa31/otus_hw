@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"io"
 	"net"
 	"time"
@@ -14,6 +15,7 @@ type TelnetClient interface {
 }
 
 type TelnetConn struct {
+	ctx     context.Context
 	addr    string
 	timeout time.Duration
 	in      io.ReadCloser
@@ -21,8 +23,15 @@ type TelnetConn struct {
 	conn    net.Conn
 }
 
-func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
+func NewTelnetClient(
+	ctx context.Context,
+	address string,
+	timeout time.Duration,
+	in io.ReadCloser,
+	out io.Writer,
+) TelnetClient {
 	return &TelnetConn{
+		ctx:     ctx,
 		addr:    address,
 		timeout: timeout,
 		in:      in,
@@ -44,10 +53,8 @@ func (tc *TelnetConn) Send() error {
 	_, err := io.Copy(tc.conn, tc.in)
 	return err
 }
+
 func (tc *TelnetConn) Receive() error {
 	_, err := io.Copy(tc.out, tc.conn)
 	return err
 }
-
-// Place your code here.
-// P.S. Author's solution takes no more than 50 lines.
