@@ -1,3 +1,4 @@
+//nolint:exhaustive
 package hw09structvalidator
 
 import (
@@ -8,9 +9,7 @@ import (
 	"strings"
 )
 
-var (
-	ErrNotStruct = errors.New("error: not structure received")
-)
+var ErrNotStruct = errors.New("error: not structure received")
 
 type ValidationError struct {
 	Field string
@@ -191,7 +190,7 @@ func ruleString(fieldValue string, fieldName string, rules []string, errList *Va
 	}
 }
 
-// Для слайсов валидируется каждый элемент слайса
+// Для слайсов валидируется каждый элемент слайса.
 func ruleSlice(fieldValue interface{}, fieldName string, rules []string, errList *ValidationErrors) {
 	switch sliceValues := fieldValue.(type) {
 	case []int:

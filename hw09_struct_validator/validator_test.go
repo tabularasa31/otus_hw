@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 type UserRole string
 
-// Test the function on different structures and other types.
 type (
 	User struct {
 		ID     string `json:"id" validate:"len:36"`
@@ -54,7 +54,8 @@ func TestValidate(t *testing.T) {
 				Age:    67,
 				Email:  "info@example.com",
 				Role:   "admin",
-				Phones: []string{"79061234567", "79012345678"}},
+				Phones: []string{"79061234567", "79012345678"},
+			},
 			expectedErr: errors.New("len is not equal 36, greater then 50, "),
 		},
 		{
@@ -63,7 +64,12 @@ func TestValidate(t *testing.T) {
 				Age:    30,
 				Email:  "info@examplecom",
 				Role:   "admin",
-				Phones: []string{"79061234567", "79012345678"}},
+				Phones: []string{"79061234567", "79012345678"},
+				meta: []byte(`[
+					{"Space": "YCbCr", "Point": {"Y": 255, "Cb": 0, "Cr": -10}},
+					{"Space": "RGB",   "Point": {"R": 98, "G": 218, "B": 255}}	
+					]`),
+			},
 			expectedErr: errors.New("len is not equal 36, string is not matched regexp expression , "),
 		},
 		{
@@ -72,7 +78,8 @@ func TestValidate(t *testing.T) {
 				Age:    37,
 				Email:  "info@example.com",
 				Role:   "manager",
-				Phones: []string{"79061234567", "7901234678"}},
+				Phones: []string{"79061234567", "7901234678"},
+			},
 			expectedErr: errors.New("len is not equal 36, not in these mass of strings , len is not equal 11, "),
 		},
 		{
@@ -83,8 +90,10 @@ func TestValidate(t *testing.T) {
 			in:          Response{Code: 505},
 			expectedErr: errors.New("not in these mass of int , "),
 		},
-		// ...
-		// Place your code here.
+		{
+			in:          Token{Header: []byte{4, 5}},
+			expectedErr: errors.New(""),
+		},
 	}
 
 	t.Run("not struct case", func(t *testing.T) {
