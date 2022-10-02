@@ -2,7 +2,9 @@ package hw09structvalidator
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -43,7 +45,43 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in:          Response{100, ""},
+			expectedErr: errors.New("not in these mass of int , "),
+		},
+		{
+			in: User{
+				ID:     "1002340",
+				Age:    67,
+				Email:  "info@example.com",
+				Role:   "admin",
+				Phones: []string{"79061234567", "79012345678"}},
+			expectedErr: errors.New("len is not equal 36, greater then 50, "),
+		},
+		{
+			in: User{
+				ID:     "1002345640",
+				Age:    30,
+				Email:  "info@examplecom",
+				Role:   "admin",
+				Phones: []string{"79061234567", "79012345678"}},
+			expectedErr: errors.New("len is not equal 36, string is not matched regexp expression , "),
+		},
+		{
+			in: User{
+				ID:     "10024567890340",
+				Age:    37,
+				Email:  "info@example.com",
+				Role:   "manager",
+				Phones: []string{"79061234567", "7901234678"}},
+			expectedErr: errors.New("len is not equal 36, not in these mass of strings , len is not equal 11, "),
+		},
+		{
+			in:          App{"v.10"},
+			expectedErr: errors.New("len is not equal 5, "),
+		},
+		{
+			in:          Response{Code: 505},
+			expectedErr: errors.New("not in these mass of int , "),
 		},
 		// ...
 		// Place your code here.
@@ -59,9 +97,13 @@ func TestValidate(t *testing.T) {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
 			tt := tt
 			t.Parallel()
+			err := Validate(tt.in)
 
-			// Place your code here.
-			_ = tt
+			if tt.expectedErr == nil {
+				assert.Nil(t, err)
+			} else {
+				assert.Equal(t, tt.expectedErr.Error(), err.Error())
+			}
 		})
 	}
 }
