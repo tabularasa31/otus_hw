@@ -41,7 +41,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	storage := storage.New(conf.Storage.Type)
+	storage := storage.New(conf.Storage)
 	calendar := app.New(logg, storage)
 
 	server := internalhttp.NewServer(logg, calendar)

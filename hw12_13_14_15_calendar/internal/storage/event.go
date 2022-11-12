@@ -2,7 +2,6 @@ package storage
 
 import (
 	"errors"
-	"github.com/google/uuid"
 	"time"
 )
 
@@ -13,13 +12,13 @@ var (
 )
 
 type Event struct {
-	Id           uuid.UUID
+	Id           int32
 	Title        string
-	EventTime    time.Time
-	Duration     time.Duration
 	Desc         string
 	UserId       int
-	Notification time.Duration
+	EventTime    time.Time
+	Duration     time.Duration
+	Notification time.Time
 }
 
 //ID - уникальный идентификатор события (можно воспользоваться UUID);
@@ -29,8 +28,3 @@ type Event struct {
 //Описание события - длинный текст, опционально;
 //ID пользователя, владельца события;
 //За сколько времени высылать уведомление, опционально.
-
-func (event Event) EventValidate() error {
-	//TODO написать ивент валидатор
-	return nil
-}

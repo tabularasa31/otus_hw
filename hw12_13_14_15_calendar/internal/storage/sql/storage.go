@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/pkg/errors"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage"
@@ -22,8 +21,10 @@ type Storage struct {
 	dsn string
 }
 
-func New() *Storage {
-	return &Storage{}
+func New(dsn string) *Storage {
+	return &Storage{
+		dsn: dsn,
+	}
 }
 
 func (s *Storage) Connect(ctx context.Context) error {
@@ -45,8 +46,8 @@ func (s *Storage) Close(ctx context.Context) error {
 	return s.db.Close()
 }
 
-func (s *Storage) Create(event storage.Event) error {
-	if err := event.EventValidate(); err != nil {
+func (s *Storage) Create(ctx context.Context, event storage.Event) error {
+	if err := s.EventValidate(event); err != nil {
 		return err
 	}
 
@@ -59,15 +60,16 @@ func (s *Storage) Create(event storage.Event) error {
 	}
 
 	query := `INSERT INTO events(userid, title, descr, event_time, duration) 
-			  VALUES ($1, $2, $3, $4, $5)`
+			  VALUES (:userId, :title, :descr, :event_time, :duration)`
 
-	_, e := s.db.Exec(query,
-		event.UserId,
-		event.Title,
-		event.Desc,
-		event.EventTime,
-		event.Duration,
-	)
+	args := map[string]interface{}{
+		"userId":     event.UserId,
+		"title":      event.Title,
+		"descr":      event.Desc,
+		"event_time": event.EventTime,
+		"duration":   event.Duration,
+	}
+	_, e := s.db.QueryContext(ctx, query, args)
 	if e != nil {
 		return fmt.Errorf("failed to create: %w", e)
 	}
@@ -75,35 +77,142 @@ func (s *Storage) Create(event storage.Event) error {
 	return nil
 }
 
-func (s *Storage) Update(event storage.Event) error {
-	return nil
-}
-func (s *Storage) Delete(Id uuid.UUID) error {
+func (s *Storage) Update(ctx context.Context, event storage.Event) error {
+	if err := s.EventValidate(event); err != nil {
+		return err
+	}
+
+	check, er := s.IsEventTimeBusy(event)
+	if !check {
+		return ErrEventTimeBusy
+	}
+	if er != nil {
+		return er
+	}
+
+	query := `UPDATE events 
+				SET userid = :userId, 
+				    title = :title, 
+				    descr = :descr, 
+				    event_time = :event_time, 
+				    duration = :duration,
+				    notification = :notification
+				WHERE id = :id`
+
+	args := map[string]interface{}{
+		"id":           event.Id,
+		"userId":       event.UserId,
+		"title":        event.Title,
+		"descr":        event.Desc,
+		"event_time":   event.EventTime,
+		"duration":     event.Duration,
+		"notification": event.Notification,
+	}
+	_, e := s.db.ExecContext(ctx, query, args)
+	if e != nil {
+		return fmt.Errorf("failed to update: %w", e)
+	}
+
 	return nil
 }
 
-func (s *Storage) GetDailyEvents(date string) ([]storage.Event, error) {
-	return s.eventsInTimeSpan(start, end, check), nil
-}
-func (s *Storage) GetWeeklyEvents(date string) ([]storage.Event, error) {
-	return s.eventsInTimeSpan(start, end, check), nil
-}
-func (s *Storage) GetMonthlyEvents(date string) ([]storage.Event, error) {
-	return s.eventsInTimeSpan(start, end, check), nil
+// Delete Удалить (ID события);
+func (s *Storage) Delete(Id int32) error {
+	_, err := s.db.Exec(`delete from events where id = $1`, Id)
+	return err
 }
 
+// GetDailyEvents СписокСобытийНаДень (дата);
+// Выводит все события, которые начинаются в заданный день
+func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	var events []storage.Event
+	query := `SELECT id, title, descr, user_id, event_time, duration, notification
+       			FROM events 
+       			WHERE DATE_TRUNC('day', event_time) = :date`
+	args := map[string]interface{}{
+		"date": date.Date(),
+	}
+	rows, err := s.db.QueryContext(ctx, query, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event storage.Event
+		if err := rows.Scan(&event.Id, &event.Title, &event.Desc,
+			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); err != nil {
+			return events, err
+		}
+		events = append(events, event)
+	}
+
+	return events, nil
+}
+
+func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	var events []storage.Event
+	query := `SELECT id, title, descr, user_id, event_time, duration, notification
+       			FROM events 
+       			WHERE DATE_TRUNC('week', event_time) 
+       			BETWEEN date :date AND date :date + 7 * interval '1 day'`
+	args := map[string]interface{}{
+		"date": date.Day(),
+	}
+	rows, err := s.db.QueryContext(ctx, query, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event storage.Event
+		if err := rows.Scan(&event.Id, &event.Title, &event.Desc,
+			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); err != nil {
+			return events, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
+func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
+	var events []storage.Event
+	query := `SELECT id, title, descr, user_id, event_time, duration, notification
+       			FROM events 
+       			WHERE DATE_TRUNC('week', event_time) 
+       			BETWEEN date :date AND date :date + 30 * interval '1 day'`
+	args := map[string]interface{}{
+		"date": date.Day(),
+	}
+	rows, err := s.db.QueryContext(ctx, query, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event storage.Event
+		if err := rows.Scan(&event.Id, &event.Title, &event.Desc,
+			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); err != nil {
+			return events, err
+		}
+		events = append(events, event)
+	}
+	return events, nil
+}
+
+// IsEventTimeBusy проверка на занятость времени
 func (s *Storage) IsEventTimeBusy(event storage.Event) (bool, error) {
 	//TODO: Написать проверку времени на занятость
 	query := `SELECT id 
 			  FROM events 
 			  WHERE userid = :userId 
-			    AND event_time > :time  
-			    AND event_time < :end_time
+			    AND event_time BETWEEN :event_time AND :end_time
 			  LIMIT 1`
 	args := map[string]interface{}{
-		"userId":   event.UserId,
-		"time":     event.EventTime,
-		"end_time": event.EventTime.Add(event.Duration),
+		"userId":     event.UserId,
+		"event_time": event.EventTime,
+		"end_time":   event.EventTime.Add(event.Duration),
 	}
 
 	rows, err := s.db.QueryContext(context.Background(), query, args)
@@ -115,16 +224,8 @@ func (s *Storage) IsEventTimeBusy(event storage.Event) (bool, error) {
 	return rows.Next(), nil
 }
 
-func (s *Storage) eventsInTimeSpan(start, end, check time.Time) []storage.Event {
-	var events []storage.Event
-
-	for _, userEvents := range s.events {
-		for _, event := range userEvents {
-			if check.After(start) && check.Before(end) {
-				events = append(events, event)
-			}
-		}
-	}
-
-	return events
+// EventValidate проверка ивента на валидность
+func (s *Storage) EventValidate(event storage.Event) error {
+	//TODO написать ивент валидатор
+	return nil
 }
