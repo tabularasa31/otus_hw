@@ -136,7 +136,11 @@ func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]storage
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			fmt.Errorf("failed to close row: %w", closeErr)
+		}
+	}()
 
 	for rows.Next() {
 		var event storage.Event
@@ -163,8 +167,11 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]storag
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
-
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			fmt.Errorf("failed to close row: %w", closeErr)
+		}
+	}()
 	for rows.Next() {
 		var event storage.Event
 		if err := rows.Scan(&event.Id, &event.Title, &event.Desc,
@@ -188,7 +195,11 @@ func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]stora
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			fmt.Errorf("failed to close row: %w", closeErr)
+		}
+	}()
 
 	for rows.Next() {
 		var event storage.Event
@@ -219,7 +230,11 @@ func (s *Storage) IsEventTimeBusy(event storage.Event) (bool, error) {
 	if err != nil {
 		return true, err
 	}
-	defer rows.Close()
+	defer func() {
+		if closeErr := rows.Close(); closeErr != nil {
+			fmt.Errorf("failed to close row: %w", closeErr)
+		}
+	}()
 
 	return rows.Next(), nil
 }

@@ -7,9 +7,6 @@ import (
 	"os"
 )
 
-type Logger struct { // TODO
-}
-
 func New(level string) (*zap.SugaredLogger, error) {
 	loglevel, err := zap.ParseAtomicLevel(level)
 	if err != nil {
@@ -26,13 +23,3 @@ func New(level string) (*zap.SugaredLogger, error) {
 
 	return sugarLogger, nil
 }
-
-func (l Logger) Info(msg string) {
-	fmt.Println(msg)
-}
-
-func (l Logger) Error(msg string) {
-	// TODO
-}
-
-// TODO

@@ -9,11 +9,6 @@ import (
 	"time"
 )
 
-const (
-	layout = "2006-01-02 15:04" // year-month-day hour:min
-	day    = "2006-01-02"       // year-month-day
-)
-
 var (
 	ErrEventTimeBusy = errors.New("event time is already busy")
 	ErrEventNotFound = errors.New("event not found")
@@ -34,7 +29,7 @@ func New() *Storage {
 	}
 }
 
-// Create Создать (событие);
+// Create Создать (событие)
 func (s *Storage) Create(ctx context.Context, event storage.Event) error {
 	if err := s.EventValidate(event); err != nil {
 		return err
@@ -159,8 +154,13 @@ func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]stora
 
 // IsEventTimeBusy проверка на занятость в заданное время
 func (s *Storage) IsEventTimeBusy(userEvents map[int32]storage.Event, newEvent storage.Event) bool {
+	newStartTime := newEvent.EventTime
+	newEndTime := newEvent.EventTime.Add(newEvent.Duration)
 	for _, userEvent := range userEvents {
-		if newEvent.EventTime.After(userEvent.EventTime) && newEvent.EventTime.Before(userEvent.EventTime.Add(userEvent.Duration)) {
+		oldStartTime := userEvent.EventTime
+		oldEndTime := userEvent.EventTime.Add(userEvent.Duration)
+		if (newStartTime.After(oldStartTime) && newStartTime.Before(oldEndTime)) ||
+			(newEndTime.After(oldStartTime) && newEndTime.Before(oldEndTime)) {
 			return false
 		}
 	}

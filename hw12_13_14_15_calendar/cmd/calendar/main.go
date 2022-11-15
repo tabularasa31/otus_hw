@@ -9,6 +9,8 @@ import (
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/server/http"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage"
+	memorystorage "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage/sql"
 	"os"
 	"os/signal"
 	"syscall"
@@ -41,10 +43,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	storage := storage.New(conf.Storage)
+	storage := New(conf.Storage)
+
 	calendar := app.New(logg, storage)
 
-	server := internalhttp.NewServer(logg, calendar)
+	server := internalhttp.NewServer(conf.HTTP, calendar, logg)
 
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
@@ -67,5 +70,16 @@ func main() {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
 		os.Exit(1) //nolint:gocritic
+	}
+}
+
+func New(StorageConf config.StorageConf) storage.Storage {
+	switch StorageConf.Type {
+	case "memory":
+		return memorystorage.New()
+	case "sql":
+		return sqlstorage.New(StorageConf.Dsn)
+	default:
+		return memorystorage.New()
 	}
 }

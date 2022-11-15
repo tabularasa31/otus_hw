@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"errors"
 	"time"
 )
@@ -19,6 +20,15 @@ type Event struct {
 	EventTime    time.Time
 	Duration     time.Duration
 	Notification time.Time
+}
+
+type Storage interface {
+	Create(ctx context.Context, event Event) error
+	Update(ctx context.Context, event Event) error
+	Delete(Id int32) error
+	GetDailyEvents(ctx context.Context, date time.Time) ([]Event, error)
+	GetWeeklyEvents(ctx context.Context, date time.Time) ([]Event, error)
+	GetMonthlyEvents(ctx context.Context, date time.Time) ([]Event, error)
 }
 
 //ID - уникальный идентификатор события (можно воспользоваться UUID);

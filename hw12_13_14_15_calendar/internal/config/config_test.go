@@ -13,8 +13,13 @@ func TestNewConfig(t *testing.T) {
   level: debug
 storage:
   type: memory
-server:
-  addr: ":8080"
+  dsn: ''
+http:
+  host: 'localhost'
+  port: 8080
+grpc:
+  host: ''
+  port: 8081
 `))
 	require.NoError(t, err)
 	conf, err := NewConfig(file.Name())
@@ -22,7 +27,10 @@ server:
 	require.NoError(t, err)
 	require.Equal(t, "debug", conf.Logger.Level)
 	require.Equal(t, "memory", conf.Storage.Type)
-	//require.Equal(t, ":8080", conf.Server.Addr)
+	require.Equal(t, "localhost", conf.HTTP.Host)
+	require.Equal(t, "8080", conf.HTTP.Port)
+	require.Equal(t, "", conf.GRPC.Host)
+	require.Equal(t, "8081", conf.GRPC.Port)
 
 	_ = os.Remove(file.Name())
 }

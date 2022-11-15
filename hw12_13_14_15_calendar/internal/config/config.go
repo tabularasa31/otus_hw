@@ -6,17 +6,29 @@ import (
 )
 
 type Config struct {
-	Logger  LoggerConf
-	Storage StorageConf
+	Logger  LoggerConf  `yaml:"logger"`
+	Storage StorageConf `yaml:"storage"`
+	HTTP    HTTPConfig  `yaml:"http"`
+	GRPC    GRPCConfig  `yaml:"grpc"`
 }
 
 type LoggerConf struct {
-	Level string
+	Level string `yaml:"level"`
 }
 
 type StorageConf struct {
-	Type string
-	Dsn  string
+	Type string `yaml:"type"`
+	Dsn  string `yaml:"dsn"`
+}
+
+type HTTPConfig struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
+}
+
+type GRPCConfig struct {
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }
 
 func NewConfig(configFile string) (Config, error) {
