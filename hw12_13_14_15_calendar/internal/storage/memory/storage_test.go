@@ -67,7 +67,7 @@ func TestCreate(t *testing.T) {
 					Duration:     time.Hour,
 					Notification: time.Now().Add(2 * time.Hour),
 				},
-				err: storage.ErrInvalidEventTitle,
+				err: memorystorage.ErrEventTitle,
 			},
 			{
 				name: "empty time of event",
@@ -78,7 +78,7 @@ func TestCreate(t *testing.T) {
 					Duration:     time.Hour,
 					Notification: time.Now().Add(2 * time.Hour),
 				},
-				err: storage.ErrInvalidEventTime,
+				err: memorystorage.ErrEventTime,
 			},
 			{
 				name: "empty duration",
@@ -89,7 +89,7 @@ func TestCreate(t *testing.T) {
 					EventTime:    time.Now().Add(5 * time.Hour),
 					Notification: time.Now().Add(4 * time.Hour),
 				},
-				err: storage.ErrInvalidEventTime,
+				err: memorystorage.ErrEventDuration,
 			},
 		}
 		stor := memorystorage.New()

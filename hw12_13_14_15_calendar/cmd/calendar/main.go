@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"flag"
 	"fmt"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/app"
@@ -18,6 +19,9 @@ import (
 )
 
 var configFile string
+
+//go:embed ../../migrations/*.sql
+var embedMigrations embed.FS
 
 func init() {
 	flag.StringVar(&configFile, "config", "/etc/calendar/config.yaml", "Path to configuration file")

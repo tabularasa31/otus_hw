@@ -13,6 +13,9 @@ var (
 	ErrEventTimeBusy = errors.New("event time is already busy")
 	ErrEventNotFound = errors.New("event not found")
 	ErrInvalidTime   = errors.New("invalid time")
+	ErrEventTitle    = errors.New("empty event title")
+	ErrEventTime     = errors.New("empty event time")
+	ErrEventDuration = errors.New("empty event duration")
 )
 
 type Storage struct {
@@ -170,5 +173,13 @@ func (s *Storage) IsEventTimeBusy(userEvents map[int32]storage.Event, newEvent s
 // EventValidate проверка ивента на валидность полей
 func (s *Storage) EventValidate(event storage.Event) error {
 	//TODO написать ивент валидатор
+	switch {
+	case event.Title == "":
+		return ErrEventTitle
+	case event.EventTime.IsZero():
+		return ErrEventTime
+	case event.Duration == 0:
+		return ErrEventDuration
+	}
 	return nil
 }

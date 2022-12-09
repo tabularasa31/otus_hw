@@ -29,6 +29,8 @@ func New(dsn string) *Storage {
 
 func (s *Storage) Connect(ctx context.Context) error {
 	var err error
+	//goose.SetBaseFS(embedMigrations)
+
 	s.db, err = sql.Open("pgx", s.dsn)
 	if err != nil {
 		return errors.Errorf("failed to load driver: %v", err)
@@ -182,6 +184,7 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]storag
 	}
 	return events, nil
 }
+
 func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
 	var events []storage.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
