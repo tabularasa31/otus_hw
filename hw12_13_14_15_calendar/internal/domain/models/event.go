@@ -1,15 +1,7 @@
-package storage
+package models
 
 import (
-	"context"
-	"errors"
 	"time"
-)
-
-var (
-	ErrInvalidEventTitle  = errors.New("invalid event title")
-	ErrInvalidEventTime   = errors.New("invalid event time")
-	ErrInvalidEventUserID = errors.New("invalid event user id")
 )
 
 type Event struct {
@@ -20,15 +12,6 @@ type Event struct {
 	EventTime    time.Time
 	Duration     time.Duration
 	Notification time.Time
-}
-
-type Storage interface {
-	Create(ctx context.Context, event Event) error
-	Update(ctx context.Context, event Event) error
-	Delete(Id int32) error
-	GetDailyEvents(ctx context.Context, date time.Time) ([]Event, error)
-	GetWeeklyEvents(ctx context.Context, date time.Time) ([]Event, error)
-	GetMonthlyEvents(ctx context.Context, date time.Time) ([]Event, error)
 }
 
 //ID - уникальный идентификатор события (можно воспользоваться UUID);

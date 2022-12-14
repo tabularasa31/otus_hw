@@ -6,7 +6,7 @@ import (
 	"fmt"
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/pkg/errors"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/models"
 	"time"
 )
 
@@ -29,7 +29,6 @@ func New(dsn string) *Storage {
 
 func (s *Storage) Connect(ctx context.Context) error {
 	var err error
-	//goose.SetBaseFS(embedMigrations)
 
 	s.db, err = sql.Open("pgx", s.dsn)
 	if err != nil {
@@ -48,7 +47,7 @@ func (s *Storage) Close(ctx context.Context) error {
 	return s.db.Close()
 }
 
-func (s *Storage) Create(ctx context.Context, event storage.Event) error {
+func (s *Storage) Create(ctx context.Context, event models.Event) error {
 	if err := s.EventValidate(event); err != nil {
 		return err
 	}
@@ -79,7 +78,7 @@ func (s *Storage) Create(ctx context.Context, event storage.Event) error {
 	return nil
 }
 
-func (s *Storage) Update(ctx context.Context, event storage.Event) error {
+func (s *Storage) Update(ctx context.Context, event models.Event) error {
 	if err := s.EventValidate(event); err != nil {
 		return err
 	}
@@ -126,8 +125,8 @@ func (s *Storage) Delete(Id int32) error {
 
 // GetDailyEvents СписокСобытийНаДень (дата);
 // Выводит все события, которые начинаются в заданный день
-func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
-	var events []storage.Event
+func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]models.Event, error) {
+	var events []models.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
        			FROM events 
        			WHERE DATE_TRUNC('day', event_time) = :date`
@@ -145,7 +144,7 @@ func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]storage
 	}()
 
 	for rows.Next() {
-		var event storage.Event
+		var event models.Event
 		if err := rows.Scan(&event.Id, &event.Title, &event.Desc,
 			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); err != nil {
 			return events, err
@@ -156,8 +155,10 @@ func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]storage
 	return events, nil
 }
 
-func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
-	var events []storage.Event
+// GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели);
+// Выводит список событий за 7 дней, начиная с дня начала
+func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]models.Event, error) {
+	var events []models.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
        			FROM events 
        			WHERE DATE_TRUNC('week', event_time) 
@@ -175,7 +176,7 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]storag
 		}
 	}()
 	for rows.Next() {
-		var event storage.Event
+		var event models.Event
 		if err := rows.Scan(&event.Id, &event.Title, &event.Desc,
 			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); err != nil {
 			return events, err
@@ -185,8 +186,10 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]storag
 	return events, nil
 }
 
-func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]storage.Event, error) {
-	var events []storage.Event
+// GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца)
+// Выводит список событий за 30 дней, начиная с дня начала
+func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]models.Event, error) {
+	var events []models.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
        			FROM events 
        			WHERE DATE_TRUNC('week', event_time) 
@@ -205,7 +208,7 @@ func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]stora
 	}()
 
 	for rows.Next() {
-		var event storage.Event
+		var event models.Event
 		if err := rows.Scan(&event.Id, &event.Title, &event.Desc,
 			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); err != nil {
 			return events, err
@@ -216,7 +219,7 @@ func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]stora
 }
 
 // IsEventTimeBusy проверка на занятость времени
-func (s *Storage) IsEventTimeBusy(event storage.Event) (bool, error) {
+func (s *Storage) IsEventTimeBusy(event models.Event) (bool, error) {
 	//TODO: Написать проверку времени на занятость
 	query := `SELECT id 
 			  FROM events 
@@ -243,7 +246,7 @@ func (s *Storage) IsEventTimeBusy(event storage.Event) (bool, error) {
 }
 
 // EventValidate проверка ивента на валидность
-func (s *Storage) EventValidate(event storage.Event) error {
+func (s *Storage) EventValidate(event models.Event) error {
 	//TODO написать ивент валидатор
 	return nil
 }

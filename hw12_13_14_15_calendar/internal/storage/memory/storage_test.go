@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/models"
 	memorystorage "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
 	"testing"
 	"time"
@@ -13,7 +13,7 @@ import (
 func TestCreate(t *testing.T) {
 	type Case struct {
 		name  string
-		event storage.Event
+		event models.Event
 		err   error
 	}
 	t.Run("success event create", func(t *testing.T) {
@@ -21,7 +21,7 @@ func TestCreate(t *testing.T) {
 		cases := []Case{
 			{
 				name: "success event create one",
-				event: storage.Event{
+				event: models.Event{
 					Title:        "event 1",
 					Desc:         "This is event one",
 					UserId:       userId,
@@ -33,7 +33,7 @@ func TestCreate(t *testing.T) {
 			},
 			{
 				name: "success event create two",
-				event: storage.Event{
+				event: models.Event{
 					Title:        "event 2",
 					Desc:         "This is event two",
 					UserId:       userId,
@@ -59,7 +59,7 @@ func TestCreate(t *testing.T) {
 		cases := []Case{
 			{
 				name: "invalid title",
-				event: storage.Event{
+				event: models.Event{
 					Title:        "",
 					Desc:         "This is event with empty title",
 					UserId:       userId,
@@ -71,7 +71,7 @@ func TestCreate(t *testing.T) {
 			},
 			{
 				name: "empty time of event",
-				event: storage.Event{
+				event: models.Event{
 					Title:        "Title 333",
 					Desc:         "This is event with empty event time",
 					UserId:       userId,
@@ -82,7 +82,7 @@ func TestCreate(t *testing.T) {
 			},
 			{
 				name: "empty duration",
-				event: storage.Event{
+				event: models.Event{
 					Title:        "Title 222",
 					Desc:         "This is event with empty duration",
 					UserId:       userId,
@@ -104,7 +104,7 @@ func TestCreate(t *testing.T) {
 	t.Run("event time busy", func(t *testing.T) {
 		userId := int(uuid.New().ID())
 		stor := memorystorage.New()
-		err := stor.Create(context.Background(), storage.Event{
+		err := stor.Create(context.Background(), models.Event{
 			Title:        "event one",
 			Desc:         "event one",
 			UserId:       userId,
@@ -114,7 +114,7 @@ func TestCreate(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		err = stor.Create(context.Background(), storage.Event{
+		err = stor.Create(context.Background(), models.Event{
 			Title:        "event two",
 			Desc:         "event two",
 			UserId:       userId,
@@ -124,7 +124,7 @@ func TestCreate(t *testing.T) {
 		})
 		require.ErrorIs(t, err, memorystorage.ErrEventTimeBusy)
 
-		err = stor.Create(context.Background(), storage.Event{
+		err = stor.Create(context.Background(), models.Event{
 			Title:        "event three",
 			Desc:         "event three",
 			UserId:       userId,
