@@ -6,15 +6,16 @@ import (
 	"fmt"
 	_ "github.com/jackc/pgx/stdlib"
 	"github.com/pkg/errors"
+	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/errors"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/models"
 	"time"
 )
 
-var (
-	ErrEventTimeBusy = errors.New("event time is already busy")
-	ErrEventNotFound = errors.New("event not found")
-	ErrInvalidTime   = errors.New("invalid time")
-)
+//var (
+//	ErrEventTimeBusy = errors.New("event time is already busy")
+//	ErrEventNotFound = errors.New("event not found")
+//	ErrInvalidTime   = errors.New("invalid time")
+//)
 
 type Storage struct {
 	db  *sql.DB
@@ -54,7 +55,7 @@ func (s *Storage) Create(ctx context.Context, event models.Event) error {
 
 	check, er := s.IsEventTimeBusy(event)
 	if !check {
-		return ErrEventTimeBusy
+		return errapp.ErrEventTimeBusy
 	}
 	if er != nil {
 		return er
@@ -85,7 +86,7 @@ func (s *Storage) Update(ctx context.Context, event models.Event) error {
 
 	check, er := s.IsEventTimeBusy(event)
 	if !check {
-		return ErrEventTimeBusy
+		return errapp.ErrEventTimeBusy
 	}
 	if er != nil {
 		return er
@@ -248,5 +249,6 @@ func (s *Storage) IsEventTimeBusy(event models.Event) (bool, error) {
 // EventValidate проверка ивента на валидность
 func (s *Storage) EventValidate(event models.Event) error {
 	//TODO написать ивент валидатор
+	_ = event
 	return nil
 }

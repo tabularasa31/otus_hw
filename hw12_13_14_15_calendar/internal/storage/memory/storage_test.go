@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/errors"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/models"
 	memorystorage "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
 	"testing"
@@ -67,7 +68,7 @@ func TestCreate(t *testing.T) {
 					Duration:     time.Hour,
 					Notification: time.Now().Add(2 * time.Hour),
 				},
-				err: memorystorage.ErrEventTitle,
+				err: errors.ErrEventTitle,
 			},
 			{
 				name: "empty time of event",
@@ -78,7 +79,7 @@ func TestCreate(t *testing.T) {
 					Duration:     time.Hour,
 					Notification: time.Now().Add(2 * time.Hour),
 				},
-				err: memorystorage.ErrEventTime,
+				err: errors.ErrEventTime,
 			},
 			{
 				name: "empty duration",
@@ -89,7 +90,7 @@ func TestCreate(t *testing.T) {
 					EventTime:    time.Now().Add(5 * time.Hour),
 					Notification: time.Now().Add(4 * time.Hour),
 				},
-				err: memorystorage.ErrEventDuration,
+				err: errors.ErrEventDuration,
 			},
 		}
 		stor := memorystorage.New()
@@ -122,7 +123,7 @@ func TestCreate(t *testing.T) {
 			Duration:     time.Hour,
 			Notification: time.Now().Add(2 * time.Hour),
 		})
-		require.ErrorIs(t, err, memorystorage.ErrEventTimeBusy)
+		require.ErrorIs(t, err, errors.ErrEventTimeBusy)
 
 		err = stor.Create(context.Background(), models.Event{
 			Title:        "event three",
@@ -132,6 +133,6 @@ func TestCreate(t *testing.T) {
 			Duration:     time.Hour,
 			Notification: time.Now().Add(2 * time.Hour),
 		})
-		require.ErrorIs(t, err, memorystorage.ErrEventTimeBusy)
+		require.ErrorIs(t, err, errors.ErrEventTimeBusy)
 	})
 }

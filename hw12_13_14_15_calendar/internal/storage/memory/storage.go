@@ -2,20 +2,11 @@ package memorystorage
 
 import (
 	"context"
-	"errors"
 	"github.com/google/uuid"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/errors"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/models"
 	"sync"
 	"time"
-)
-
-var (
-	ErrEventTimeBusy = errors.New("event time is already busy")
-	ErrEventNotFound = errors.New("event not found")
-	ErrInvalidTime   = errors.New("invalid time")
-	ErrEventTitle    = errors.New("empty event title")
-	ErrEventTime     = errors.New("empty event time")
-	ErrEventDuration = errors.New("empty event duration")
 )
 
 type Storage struct {
@@ -49,7 +40,7 @@ func (s *Storage) Create(ctx context.Context, event models.Event) error {
 	}
 
 	if !s.IsEventTimeBusy(userEvents, event) {
-		return ErrEventTimeBusy
+		return errors.ErrEventTimeBusy
 	}
 
 	s.events[event.UserId][event.Id] = event
@@ -66,16 +57,16 @@ func (s *Storage) Update(ctx context.Context, event models.Event) error {
 
 	userEvents, ok := s.events[event.UserId]
 	if !ok {
-		return ErrEventNotFound
+		return errors.ErrEventNotFound
 	}
 
 	updatedEvent, ok := userEvents[event.Id]
 	if !ok {
-		return ErrEventNotFound
+		return errors.ErrEventNotFound
 	}
 
 	if !s.IsEventTimeBusy(userEvents, event) {
-		return ErrEventTimeBusy
+		return errors.ErrEventTimeBusy
 	}
 
 	updatedEvent.Title = event.Title
@@ -98,7 +89,7 @@ func (s *Storage) Delete(Id int32) error {
 			return nil
 		}
 	}
-	return ErrEventNotFound
+	return errors.ErrEventNotFound
 }
 
 // GetDailyEvents СписокСобытийНаДень (дата);
@@ -175,11 +166,11 @@ func (s *Storage) EventValidate(event models.Event) error {
 	//TODO написать ивент валидатор
 	switch {
 	case event.Title == "":
-		return ErrEventTitle
+		return errors.ErrEventTitle
 	case event.EventTime.IsZero():
-		return ErrEventTime
+		return errors.ErrEventTime
 	case event.Duration == 0:
-		return ErrEventDuration
+		return errors.ErrEventDuration
 	}
 	return nil
 }
