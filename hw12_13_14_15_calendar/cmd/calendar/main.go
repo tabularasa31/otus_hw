@@ -2,14 +2,13 @@ package main
 
 import (
 	"context"
-	"embed"
 	"flag"
 	"fmt"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/app"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/config"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/domain/interfaces"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/server/http"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage"
 	memorystorage "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/storage/sql"
 	"os"
@@ -19,9 +18,6 @@ import (
 )
 
 var configFile string
-
-//go:embed ../../migrations/*.sql
-var embedMigrations embed.FS
 
 func init() {
 	flag.StringVar(&configFile, "config", "/etc/calendar/config.yaml", "Path to configuration file")
@@ -77,7 +73,7 @@ func main() {
 	}
 }
 
-func New(StorageConf config.StorageConf) storage.Storage {
+func New(StorageConf config.StorageConf) interfaces.Storage {
 	switch StorageConf.Type {
 	case "memory":
 		return memorystorage.New()
