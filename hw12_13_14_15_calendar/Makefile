@@ -31,4 +31,10 @@ install-lint-deps:
 lint: install-lint-deps
 	golangci-lint run ./...
 
+migrate:
+	goose -dir migrations postgres "${DB_USER}:${DB_PASSWORD}@tcp(localhost:${DB_PORT})/${DB_NAME}?parseTime=true" up
+
+rollback:
+
+
 .PHONY: build run build-img run-img version test lint
