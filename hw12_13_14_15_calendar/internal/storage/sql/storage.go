@@ -126,7 +126,7 @@ func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]models.
        			FROM events 
        			WHERE DATE_TRUNC('day', event_time) = :date`
 	args := map[string]interface{}{
-		"date": date.Date(),
+		"date": date.Day(),
 	}
 	rows, err := s.db.QueryContext(ctx, query, args)
 	if err != nil {
