@@ -11,12 +11,6 @@ import (
 	"time"
 )
 
-//var (
-//	ErrEventTimeBusy = errors.New("event time is already busy")
-//	ErrEventNotFound = errors.New("event not found")
-//	ErrInvalidTime   = errors.New("invalid time")
-//)
-
 type Storage struct {
 	db  *sql.DB
 	dsn string
