@@ -25,7 +25,7 @@ func New() *Storage {
 
 // CreateEvent Создать (событие)
 func (s *Storage) CreateEvent(ctx context.Context, event entity.Event) error {
-	if err := s.EventValidate(event); err != nil {
+	if err := s.eventValidate(event); err != nil {
 		return err
 	}
 
@@ -39,7 +39,7 @@ func (s *Storage) CreateEvent(ctx context.Context, event entity.Event) error {
 		s.events[event.UserId] = make(map[int32]entity.Event)
 	}
 
-	if !s.IsEventTimeBusy(userEvents, event) {
+	if !s.isEventTimeBusy(userEvents, event) {
 		return repo.ErrEventTimeBusy
 	}
 
@@ -49,7 +49,7 @@ func (s *Storage) CreateEvent(ctx context.Context, event entity.Event) error {
 
 // UpdateEvent Обновить (ID события, событие);
 func (s *Storage) UpdateEvent(ctx context.Context, event entity.Event) error {
-	if err := s.EventValidate(event); err != nil {
+	if err := s.eventValidate(event); err != nil {
 		return err
 	}
 	s.mu.Lock()
@@ -65,7 +65,7 @@ func (s *Storage) UpdateEvent(ctx context.Context, event entity.Event) error {
 		return repo.ErrEventNotFound
 	}
 
-	if !s.IsEventTimeBusy(userEvents, event) {
+	if !s.isEventTimeBusy(userEvents, event) {
 		return repo.ErrEventTimeBusy
 	}
 
@@ -146,8 +146,8 @@ func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]entit
 	return events, nil
 }
 
-// IsEventTimeBusy проверка на занятость в заданное время
-func (s *Storage) IsEventTimeBusy(userEvents map[int32]entity.Event, newEvent entity.Event) bool {
+// isEventTimeBusy проверка на занятость в заданное время
+func (s *Storage) isEventTimeBusy(userEvents map[int32]entity.Event, newEvent entity.Event) bool {
 	newStartTime := newEvent.EventTime
 	newEndTime := newEvent.EventTime.Add(newEvent.Duration)
 	for _, userEvent := range userEvents {
@@ -161,8 +161,8 @@ func (s *Storage) IsEventTimeBusy(userEvents map[int32]entity.Event, newEvent en
 	return true
 }
 
-// EventValidate проверка ивента на валидность полей
-func (s *Storage) EventValidate(event entity.Event) error {
+// eventValidate проверка ивента на валидность полей
+func (s *Storage) eventValidate(event entity.Event) error {
 	//TODO написать ивент валидатор
 	switch {
 	case event.Title == "":

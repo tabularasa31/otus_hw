@@ -20,11 +20,11 @@ func New(pg *postgres.Postgres) *PostrgesRepo {
 }
 
 func (s *PostrgesRepo) CreateEvent(ctx context.Context, event entity.Event) error {
-	if err := s.EventValidate(event); err != nil {
+	if err := s.eventValidate(event); err != nil {
 		return err
 	}
 
-	check, er := s.IsEventTimeBusy(event)
+	check, er := s.isEventTimeBusy(event)
 	if !check {
 		return errapp.ErrEventTimeBusy
 	}
@@ -51,11 +51,11 @@ func (s *PostrgesRepo) CreateEvent(ctx context.Context, event entity.Event) erro
 }
 
 func (s *PostrgesRepo) UpdateEvent(ctx context.Context, event entity.Event) error {
-	if err := s.EventValidate(event); err != nil {
+	if err := s.eventValidate(event); err != nil {
 		return err
 	}
 
-	check, er := s.IsEventTimeBusy(event)
+	check, er := s.isEventTimeBusy(event)
 	if !check {
 		return errapp.ErrEventTimeBusy
 	}
@@ -179,8 +179,8 @@ func (s *PostrgesRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]
 	return events, nil
 }
 
-// IsEventTimeBusy проверка на занятость времени
-func (s *PostrgesRepo) IsEventTimeBusy(event entity.Event) (bool, error) {
+// isEventTimeBusy проверка на занятость времени
+func (s *PostrgesRepo) isEventTimeBusy(event entity.Event) (bool, error) {
 	//TODO: Написать проверку времени на занятость
 	query := `SELECT id 
 			  FROM events 
@@ -202,8 +202,8 @@ func (s *PostrgesRepo) IsEventTimeBusy(event entity.Event) (bool, error) {
 	return rows.Next(), nil
 }
 
-// EventValidate проверка ивента на валидность
-func (s *PostrgesRepo) EventValidate(event entity.Event) error {
+// eventValidate проверка ивента на валидность
+func (s *PostrgesRepo) eventValidate(event entity.Event) error {
 	//TODO написать ивент валидатор
 	_ = event
 	return nil
