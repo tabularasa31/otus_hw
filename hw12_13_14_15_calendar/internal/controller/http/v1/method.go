@@ -13,13 +13,22 @@ type calendarRoutes struct {
 	l logger.Interface
 }
 
-func newTranslationRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l logger.Interface) {
+func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l logger.Interface) {
 	r := &calendarRoutes{u, l}
 
 	h := handler.Group("/cal")
 	{
+		h.GET("/", r.home)
 		h.GET("/hello", r.hello)
 	}
+}
+
+// @Summary     Welcome message
+// @Description Show Hello World
+// @ID          home
+// @Tags  	    home
+func (r *calendarRoutes) home(c *gin.Context) {
+	c.String(http.StatusOK, "OK")
 }
 
 // @Summary     Welcome message
@@ -32,5 +41,7 @@ func newTranslationRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l lo
 // @Failure     500 {object}
 // @Router      /cal/hello [get]
 func (r *calendarRoutes) hello(c *gin.Context) {
-	c.JSON(http.StatusOK, "Hello, world!")
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Hello, world!",
+	})
 }

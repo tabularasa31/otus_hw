@@ -11,16 +11,16 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.yml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "../../config/config.yml", "Path to configuration file")
 }
 
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" {
-		printVersion()
-		return
-	}
+	//if flag.Arg(0) == "version" {
+	//	printVersion()
+	//	return
+	//}
 
 	// Configuration
 	cfg, err := config.NewConfig(configFile)

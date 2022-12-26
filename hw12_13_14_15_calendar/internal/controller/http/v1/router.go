@@ -27,6 +27,6 @@ func NewRouter(handler *gin.Engine, logg logger.Interface, u usecase.EventUseCas
 	// Routers
 	h := handler.Group("/v1")
 	{
-		newTranslationRoutes(h, u, logg)
+		newCalendarRoutes(h, u, logg)
 	}
 }
