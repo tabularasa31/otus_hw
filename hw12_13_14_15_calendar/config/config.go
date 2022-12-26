@@ -46,27 +46,41 @@ func NewConfig(file string) (*Config, error) {
 		return nil, err
 	}
 
-	if e := cfgValidate(*cfg); e != nil {
-		return nil, e
+	v := validator.New()
+	if err := v.Struct(cfg); err != nil {
+		return nil, fmt.Errorf("failed config: %w", err)
 	}
+	if err := v.Struct(cfg.Storage); err != nil {
+		return nil, fmt.Errorf("failed Storage config: %w", err)
+	}
+	if err := v.Struct(cfg.HTTP); err != nil {
+		return nil, fmt.Errorf("failed HTTP config: %w", err)
+	}
+	if err := v.Struct(cfg.GRPC); err != nil {
+		return nil, fmt.Errorf("failed GRPS config: %w", err)
+	}
+
+	//if e := cfgValidate(*cfg); e != nil {
+	//	return nil, e
+	//}
 
 	return cfg, nil
 }
 
 // cfgValidate validate config
-func cfgValidate(cfg Config) error {
-	v := validator.New()
-	if err := v.Struct(cfg); err != nil {
-		return fmt.Errorf("failed config: %w", err)
-	}
-	if err := v.Struct(cfg.Storage); err != nil {
-		return fmt.Errorf("failed Storage config: %w", err)
-	}
-	if err := v.Struct(cfg.HTTP); err != nil {
-		return fmt.Errorf("failed HTTP config: %w", err)
-	}
-	if err := v.Struct(cfg.GRPC); err != nil {
-		return fmt.Errorf("failed GRPS config: %w", err)
-	}
-	return nil
-}
+//func cfgValidate(cfg Config) error {
+//	v := validator.New()
+//	if err := v.Struct(cfg); err != nil {
+//		return fmt.Errorf("failed config: %w", err)
+//	}
+//	if err := v.Struct(cfg.Storage); err != nil {
+//		return fmt.Errorf("failed Storage config: %w", err)
+//	}
+//	if err := v.Struct(cfg.HTTP); err != nil {
+//		return fmt.Errorf("failed HTTP config: %w", err)
+//	}
+//	if err := v.Struct(cfg.GRPC); err != nil {
+//		return fmt.Errorf("failed GRPS config: %w", err)
+//	}
+//	return nil
+//}
