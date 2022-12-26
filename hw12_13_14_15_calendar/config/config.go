@@ -50,15 +50,6 @@ func NewConfig(file string) (*Config, error) {
 	if err = v.Struct(cfg); err != nil {
 		return nil, fmt.Errorf("failed config: %w", err)
 	}
-	if err = v.Struct(cfg.Storage); err != nil {
-		return nil, fmt.Errorf("failed Storage config: %w", err)
-	}
-	if err = v.Struct(cfg.HTTP); err != nil {
-		return nil, fmt.Errorf("failed HTTP config: %w", err)
-	}
-	if err = v.Struct(cfg.GRPC); err != nil {
-		return nil, fmt.Errorf("failed GRPS config: %w", err)
-	}
 
 	//if e := cfgValidate(*cfg); e != nil {
 	//	return nil, e
