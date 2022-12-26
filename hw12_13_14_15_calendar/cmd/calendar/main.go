@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
+	"log"
+
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/app"
-	"log"
 )
 
 var configFile string
