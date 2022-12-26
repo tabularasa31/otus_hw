@@ -10,8 +10,8 @@ type (
 	Config struct {
 		Logger  `yaml:"logger"`
 		Storage `yaml:"storage" validate:"required"`
-		HTTP    `yaml:"httpserver" validate:"required"`
-		GRPC    `yaml:"grpcserver" validate:"required"`
+		HTTP    `yaml:"http" validate:"required"`
+		GRPC    `yaml:"grpc" validate:"required"`
 	}
 
 	Logger struct {

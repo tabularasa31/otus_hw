@@ -14,9 +14,9 @@ func TestNewConfig(t *testing.T) {
 storage:
   type: memory
   dsn: ''
-httpserver:
+http:
   addr: 'localhost:8080'
-grpcserver:
+grpc:
   addr: 'localhost:8081'
 `))
 	require.NoError(t, err)
@@ -39,9 +39,9 @@ func TestFailedConfig(t *testing.T) {
 storage:
   type: memory
   dsn: ''
-httpserver:
+http:
   addr: 'localhost:foo'
-grpcserver:
+grpc:
   addr: 'localhost:bar'
 `))
 	conf, err := NewConfig(file.Name())
