@@ -81,7 +81,7 @@ func (s *PostrgesRepo) UpdateEvent(ctx context.Context, event entity.Event) erro
 		"duration":     event.Duration,
 		"notification": event.Notification,
 	}
-	_, e := s.Pool.Exec(ctx, query, args)
+	_, e := s.Postgres.Pool.Exec(ctx, query, args)
 	if e != nil {
 		return fmt.Errorf("failed to update: %w", e)
 	}
