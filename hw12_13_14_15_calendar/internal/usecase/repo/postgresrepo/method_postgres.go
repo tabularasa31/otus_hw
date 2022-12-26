@@ -91,7 +91,7 @@ func (s *PostrgesRepo) UpdateEvent(ctx context.Context, event entity.Event) erro
 
 // DeleteEvent Удалить (ID события);
 func (s *PostrgesRepo) DeleteEvent(ctx context.Context, Id int32) error {
-	_, err := s.Pool.Exec(ctx, `delete from events where id = $1`, Id)
+	_, err := s.Postgres.Pool.Exec(ctx, `delete from events where id = $1`, Id)
 	return err
 }
 
@@ -105,7 +105,7 @@ func (s *PostrgesRepo) GetDailyEvents(ctx context.Context, date time.Time) ([]en
 	args := map[string]interface{}{
 		"date": date.Day(),
 	}
-	rows, err := s.Pool.Query(ctx, query, args)
+	rows, err := s.Postgres.Pool.Query(ctx, query, args)
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +134,7 @@ func (s *PostrgesRepo) GetWeeklyEvents(ctx context.Context, date time.Time) ([]e
 	args := map[string]interface{}{
 		"date": date.Day(),
 	}
-	rows, err := s.Pool.Query(ctx, query, args)
+	rows, err := s.Postgres.Pool.Query(ctx, query, args)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (s *PostrgesRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]
 	args := map[string]interface{}{
 		"date": date.Day(),
 	}
-	rows, err := s.Pool.Query(ctx, query, args)
+	rows, err := s.Postgres.Pool.Query(ctx, query, args)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func (s *PostrgesRepo) IsEventTimeBusy(event entity.Event) (bool, error) {
 		"end_time":   event.EventTime.Add(event.Duration),
 	}
 
-	rows, err := s.Pool.Query(context.Background(), query, args)
+	rows, err := s.Postgres.Pool.Query(context.Background(), query, args)
 	if err != nil {
 		return true, err
 	}
