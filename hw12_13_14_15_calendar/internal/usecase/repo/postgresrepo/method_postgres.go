@@ -42,7 +42,7 @@ func (s *PostrgesRepo) CreateEvent(ctx context.Context, event entity.Event) erro
 		"event_time": event.EventTime,
 		"duration":   event.Duration,
 	}
-	_, e := s.Pool.Query(ctx, query, args)
+	_, e := s.Postgres.Pool.Query(ctx, query, args)
 	if e != nil {
 		return fmt.Errorf("failed to create: %w", e)
 	}
