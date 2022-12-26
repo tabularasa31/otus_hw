@@ -9,9 +9,9 @@ import (
 type (
 	Config struct {
 		Logger  `yaml:"logger"`
-		Storage `yaml:"storage"`
-		HTTP    `yaml:"httpserver"`
-		GRPC    `yaml:"grpcserver"`
+		Storage `yaml:"storage" validate:"required"`
+		HTTP    `yaml:"httpserver" validate:"required"`
+		GRPC    `yaml:"grpcserver" validate:"required"`
 	}
 
 	Logger struct {
@@ -32,8 +32,6 @@ type (
 	}
 )
 
-var v *validator.Validate
-
 // NewConfig returns app config.
 func NewConfig(file string) (*Config, error) {
 	cfg := &Config{}
@@ -48,8 +46,8 @@ func NewConfig(file string) (*Config, error) {
 		return nil, err
 	}
 
-	v = validator.New()
-	if err = v.Struct(*cfg); err != nil {
+	v := validator.New()
+	if err = v.Struct(cfg); err != nil {
 		return nil, fmt.Errorf("failed config: %w", err)
 	}
 	if err = v.Struct(cfg.Storage); err != nil {
