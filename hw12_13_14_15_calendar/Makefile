@@ -12,7 +12,7 @@ build:
 .PHONY: build
 
 run: build
-	$(BIN) -config ./configs/config.toml
+	$(BIN) -config ../../config/config.yml
 .PHONY: run
 
 build-img:
