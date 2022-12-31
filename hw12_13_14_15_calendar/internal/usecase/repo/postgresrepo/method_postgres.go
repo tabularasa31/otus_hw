@@ -4,27 +4,27 @@ import (
 	"context"
 	"fmt"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
-	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase/repo"
+	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
 	"time"
 )
 
-// PostrgesRepo -.
-type PostrgesRepo struct {
+// EventRepo -.
+type EventRepo struct {
 	*postgres.Postgres
 }
 
 // New -.
-func New(pg *postgres.Postgres) *PostrgesRepo {
-	return &PostrgesRepo{pg}
+func New(pg *postgres.Postgres) *EventRepo {
+	return &EventRepo{pg}
 }
 
-func (s *PostrgesRepo) CreateEvent(ctx context.Context, event entity.Event) error {
-	if err := s.eventValidate(event); err != nil {
+func (r *EventRepo) CreateEvent(ctx context.Context, event entity.Event) error {
+	if err := r.eventValidate(event); err != nil {
 		return err
 	}
 
-	check, er := s.isEventTimeBusy(event)
+	check, er := r.isEventTimeBusy(event)
 	if !check {
 		return errapp.ErrEventTimeBusy
 	}
@@ -42,7 +42,7 @@ func (s *PostrgesRepo) CreateEvent(ctx context.Context, event entity.Event) erro
 		"event_time": event.EventTime,
 		"duration":   event.Duration,
 	}
-	_, e := s.Postgres.Pool.Query(ctx, query, args)
+	_, e := r.Postgres.Pool.Query(ctx, query, args)
 	if e != nil {
 		return fmt.Errorf("failed to create: %w", e)
 	}
@@ -50,12 +50,12 @@ func (s *PostrgesRepo) CreateEvent(ctx context.Context, event entity.Event) erro
 	return nil
 }
 
-func (s *PostrgesRepo) UpdateEvent(ctx context.Context, event entity.Event) error {
-	if err := s.eventValidate(event); err != nil {
+func (r *EventRepo) UpdateEvent(ctx context.Context, event entity.Event) error {
+	if err := r.eventValidate(event); err != nil {
 		return err
 	}
 
-	check, er := s.isEventTimeBusy(event)
+	check, er := r.isEventTimeBusy(event)
 	if !check {
 		return errapp.ErrEventTimeBusy
 	}
@@ -81,7 +81,7 @@ func (s *PostrgesRepo) UpdateEvent(ctx context.Context, event entity.Event) erro
 		"duration":     event.Duration,
 		"notification": event.Notification,
 	}
-	_, e := s.Postgres.Pool.Exec(ctx, query, args)
+	_, e := r.Postgres.Pool.Exec(ctx, query, args)
 	if e != nil {
 		return fmt.Errorf("failed to update: %w", e)
 	}
@@ -90,14 +90,14 @@ func (s *PostrgesRepo) UpdateEvent(ctx context.Context, event entity.Event) erro
 }
 
 // DeleteEvent Удалить (ID события);
-func (s *PostrgesRepo) DeleteEvent(ctx context.Context, Id int32) error {
-	_, err := s.Postgres.Pool.Exec(ctx, `delete from events where id = $1`, Id)
+func (r *EventRepo) DeleteEvent(ctx context.Context, Id int32) error {
+	_, err := r.Postgres.Pool.Exec(ctx, `delete from events where id = $1`, Id)
 	return err
 }
 
 // GetDailyEvents СписокСобытийНаДень (дата);
 // Выводит все события, которые начинаются в заданный день
-func (s *PostrgesRepo) GetDailyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetDailyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
        			FROM events 
@@ -105,7 +105,7 @@ func (s *PostrgesRepo) GetDailyEvents(ctx context.Context, date time.Time) ([]en
 	args := map[string]interface{}{
 		"date": date.Day(),
 	}
-	rows, err := s.Postgres.Pool.Query(ctx, query, args)
+	rows, err := r.Postgres.Pool.Query(ctx, query, args)
 	if err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func (s *PostrgesRepo) GetDailyEvents(ctx context.Context, date time.Time) ([]en
 
 // GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели);
 // Выводит список событий за 7 дней, начиная с дня начала
-func (s *PostrgesRepo) GetWeeklyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetWeeklyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
        			FROM events 
@@ -134,7 +134,7 @@ func (s *PostrgesRepo) GetWeeklyEvents(ctx context.Context, date time.Time) ([]e
 	args := map[string]interface{}{
 		"date": date.Day(),
 	}
-	rows, err := s.Postgres.Pool.Query(ctx, query, args)
+	rows, err := r.Postgres.Pool.Query(ctx, query, args)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (s *PostrgesRepo) GetWeeklyEvents(ctx context.Context, date time.Time) ([]e
 
 // GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца)
 // Выводит список событий за 30 дней, начиная с дня начала
-func (s *PostrgesRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
        			FROM events 
@@ -162,7 +162,7 @@ func (s *PostrgesRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]
 	args := map[string]interface{}{
 		"date": date.Day(),
 	}
-	rows, err := s.Postgres.Pool.Query(ctx, query, args)
+	rows, err := r.Postgres.Pool.Query(ctx, query, args)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func (s *PostrgesRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]
 }
 
 // isEventTimeBusy проверка на занятость времени
-func (s *PostrgesRepo) isEventTimeBusy(event entity.Event) (bool, error) {
+func (r *EventRepo) isEventTimeBusy(event entity.Event) (bool, error) {
 	//TODO: Написать проверку времени на занятость
 	query := `SELECT id 
 			  FROM events 
@@ -193,7 +193,7 @@ func (s *PostrgesRepo) isEventTimeBusy(event entity.Event) (bool, error) {
 		"end_time":   event.EventTime.Add(event.Duration),
 	}
 
-	rows, err := s.Postgres.Pool.Query(context.Background(), query, args)
+	rows, err := r.Postgres.Pool.Query(context.Background(), query, args)
 	if err != nil {
 		return true, err
 	}
@@ -203,8 +203,16 @@ func (s *PostrgesRepo) isEventTimeBusy(event entity.Event) (bool, error) {
 }
 
 // eventValidate проверка ивента на валидность
-func (s *PostrgesRepo) eventValidate(event entity.Event) error {
-	//TODO написать ивент валидатор
-	_ = event
+func (r *EventRepo) eventValidate(event entity.Event) error {
+	switch {
+	case event.Title == "":
+		return errapp.ErrEventTitle
+	case event.UserId == 0:
+		return errapp.ErrEventUserID
+	case event.EventTime.IsZero():
+		return errapp.ErrEventTime
+	case event.Duration == 0:
+		return errapp.ErrEventDuration
+	}
 	return nil
 }

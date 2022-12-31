@@ -23,7 +23,7 @@ func Run(cfg *config.Config) {
 	// Logger
 	logg := logger.New(cfg.Logger.Level)
 
-	// Repo
+	// EventRepo
 	r := repo(cfg)
 
 	// Use case
@@ -52,7 +52,7 @@ func Run(cfg *config.Config) {
 	}
 }
 
-func repo(cfg *config.Config) usecase.Storage {
+func repo(cfg *config.Config) usecase.EventRepo {
 	if cfg.Storage.Type == "postgres" {
 		pg, err := postgres.New(cfg.Storage.Dsn)
 		if err != nil {

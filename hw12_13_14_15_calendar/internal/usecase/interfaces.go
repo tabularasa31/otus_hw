@@ -6,11 +6,22 @@ import (
 	"time"
 )
 
-type Storage interface {
-	CreateEvent(ctx context.Context, event entity.Event) error
-	UpdateEvent(ctx context.Context, event entity.Event) error
-	DeleteEvent(ctx context.Context, Id int32) error
-	GetDailyEvents(ctx context.Context, date time.Time) ([]entity.Event, error)
-	GetWeeklyEvents(ctx context.Context, date time.Time) ([]entity.Event, error)
-	GetMonthlyEvents(ctx context.Context, date time.Time) ([]entity.Event, error)
-}
+type (
+	Event interface {
+		Create(context.Context, entity.Event) error
+		Update(context.Context, entity.Event) error
+		Delete(context.Context, int32) error
+		DailyEvents(context.Context, time.Time) ([]entity.Event, error)
+		WeeklyEvents(context.Context, time.Time) ([]entity.Event, error)
+		MonthlyEvents(context.Context, time.Time) ([]entity.Event, error)
+	}
+
+	EventRepo interface {
+		CreateEvent(context.Context, entity.Event) error
+		UpdateEvent(context.Context, entity.Event) error
+		DeleteEvent(context.Context, int32) error
+		GetDailyEvents(context.Context, time.Time) ([]entity.Event, error)
+		GetWeeklyEvents(context.Context, time.Time) ([]entity.Event, error)
+		GetMonthlyEvents(context.Context, time.Time) ([]entity.Event, error)
+	}
+)

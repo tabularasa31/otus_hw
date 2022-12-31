@@ -4,69 +4,73 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase/repo"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
+	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
+
 	"sync"
 	"time"
 )
 
-type Storage struct {
+// EventRepo -.
+type EventRepo struct {
 	events map[int]map[int32]entity.Event
 	mu     sync.RWMutex
 }
 
-func New() *Storage {
+// New -.
+func New() *EventRepo {
 	m := sync.RWMutex{}
 	events := make(map[int]map[int32]entity.Event)
-	return &Storage{
+	return &EventRepo{
 		events: events,
 		mu:     m,
 	}
 }
 
 // CreateEvent Создать (событие)
-func (s *Storage) CreateEvent(ctx context.Context, event entity.Event) error {
-	if err := s.eventValidate(event); err != nil {
+func (r *EventRepo) CreateEvent(ctx context.Context, event entity.Event) error {
+	if err := r.eventValidate(event); err != nil {
 		return err
 	}
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
 	event.Id = int32(uuid.New().ID()) // CreateEvent unique ID
 
-	userEvents, ok := s.events[event.UserId]
+	userEvents, ok := r.events[event.UserId]
 	if !ok {
-		s.events[event.UserId] = make(map[int32]entity.Event)
+		r.events[event.UserId] = make(map[int32]entity.Event)
 	}
 
-	if !s.isEventTimeBusy(userEvents, event) {
-		return repo.ErrEventTimeBusy
+	if !r.isEventTimeBusy(userEvents, event) {
+		return usecase.ErrEventTimeBusy
 	}
 
-	s.events[event.UserId][event.Id] = event
+	r.events[event.UserId][event.Id] = event
 	return nil
 }
 
 // UpdateEvent Обновить (ID события, событие);
-func (s *Storage) UpdateEvent(ctx context.Context, event entity.Event) error {
-	if err := s.eventValidate(event); err != nil {
+func (r *EventRepo) UpdateEvent(ctx context.Context, event entity.Event) error {
+	if err := r.eventValidate(event); err != nil {
 		return err
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
-	userEvents, ok := s.events[event.UserId]
+	userEvents, ok := r.events[event.UserId]
 	if !ok {
-		return repo.ErrEventNotFound
+		return usecase.ErrEventNotFound
 	}
 
 	updatedEvent, ok := userEvents[event.Id]
 	if !ok {
-		return repo.ErrEventNotFound
+		return usecase.ErrEventNotFound
 	}
 
-	if !s.isEventTimeBusy(userEvents, event) {
-		return repo.ErrEventTimeBusy
+	if !r.isEventTimeBusy(userEvents, event) {
+		return usecase.ErrEventTimeBusy
 	}
 
 	updatedEvent.Title = event.Title
@@ -74,35 +78,37 @@ func (s *Storage) UpdateEvent(ctx context.Context, event entity.Event) error {
 	updatedEvent.EventTime = event.EventTime
 	updatedEvent.Duration = event.Duration
 
-	s.events[event.UserId][event.Id] = updatedEvent
+	r.events[event.UserId][event.Id] = updatedEvent
 	return nil
 }
 
 // DeleteEvent Удалить (ID события);
-func (s *Storage) DeleteEvent(ctx context.Context, Id int32) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+func (r *EventRepo) DeleteEvent(ctx context.Context, Id int32) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
-	for _, userEvents := range s.events {
+	for _, userEvents := range r.events {
 		if _, ok := userEvents[Id]; !ok {
 			delete(userEvents, Id)
 			return nil
 		}
 	}
-	return repo.ErrEventNotFound
+	return usecase.ErrEventNotFound
 }
 
 // GetDailyEvents СписокСобытийНаДень (дата);
 // Выводит все события, которые начинаются в заданный день
-func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetDailyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+	day := date.Day()
 
-	for _, userEvents := range s.events {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, userEvents := range r.events {
 		for _, event := range userEvents {
-			if event.EventTime.Day() == date.Day() {
+			if event.EventTime.Day() == day {
 				events = append(events, event)
 			}
 		}
@@ -112,15 +118,17 @@ func (s *Storage) GetDailyEvents(ctx context.Context, date time.Time) ([]entity.
 
 // GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели);
 // Выводит список событий за 7 дней, начиная с дня начала
-func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetWeeklyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+	endDay := date.Add(7 * 24 * time.Hour)
 
-	for _, userEvents := range s.events {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, userEvents := range r.events {
 		for _, event := range userEvents {
-			if event.EventTime.Weekday() == date.Weekday() {
+			if event.EventTime.After(date) && event.EventTime.Before(endDay) {
 				events = append(events, event)
 			}
 		}
@@ -130,15 +138,17 @@ func (s *Storage) GetWeeklyEvents(ctx context.Context, date time.Time) ([]entity
 
 // GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца)
 // Выводит список событий за 30 дней, начиная с дня начала
-func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+	endDay := date.Add(7 * 24 * 30 * time.Hour)
 
-	for _, userEvents := range s.events {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, userEvents := range r.events {
 		for _, event := range userEvents {
-			if event.EventTime.Month() == date.Month() {
+			if event.EventTime.After(date) && event.EventTime.Before(endDay) {
 				events = append(events, event)
 			}
 		}
@@ -147,7 +157,7 @@ func (s *Storage) GetMonthlyEvents(ctx context.Context, date time.Time) ([]entit
 }
 
 // isEventTimeBusy проверка на занятость в заданное время
-func (s *Storage) isEventTimeBusy(userEvents map[int32]entity.Event, newEvent entity.Event) bool {
+func (r *EventRepo) isEventTimeBusy(userEvents map[int32]entity.Event, newEvent entity.Event) bool {
 	newStartTime := newEvent.EventTime
 	newEndTime := newEvent.EventTime.Add(newEvent.Duration)
 	for _, userEvent := range userEvents {
@@ -162,15 +172,16 @@ func (s *Storage) isEventTimeBusy(userEvents map[int32]entity.Event, newEvent en
 }
 
 // eventValidate проверка ивента на валидность полей
-func (s *Storage) eventValidate(event entity.Event) error {
-	//TODO написать ивент валидатор
+func (r *EventRepo) eventValidate(event entity.Event) error {
 	switch {
 	case event.Title == "":
-		return repo.ErrEventTitle
+		return errapp.ErrEventTitle
+	case event.UserId == 0:
+		return errapp.ErrEventUserID
 	case event.EventTime.IsZero():
-		return repo.ErrEventTime
+		return errapp.ErrEventTime
 	case event.Duration == 0:
-		return repo.ErrEventDuration
+		return errapp.ErrEventDuration
 	}
 	return nil
 }
