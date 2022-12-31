@@ -181,7 +181,6 @@ func (r *EventRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]ent
 
 // isEventTimeBusy проверка на занятость времени
 func (r *EventRepo) isEventTimeBusy(event entity.Event) (bool, error) {
-	//TODO: Написать проверку времени на занятость
 	query := `SELECT id 
 			  FROM events 
 			  WHERE user_id = :userId 

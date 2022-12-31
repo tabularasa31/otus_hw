@@ -27,7 +27,7 @@ func TestCreate(t *testing.T) {
 					UserId:       userId,
 					EventTime:    time.Now().Add(time.Hour),
 					Duration:     time.Hour,
-					Notification: time.Now(),
+					Notification: time.Hour,
 				},
 				err: nil,
 			},
@@ -39,7 +39,7 @@ func TestCreate(t *testing.T) {
 					UserId:       userId,
 					EventTime:    time.Now().Add(3 * time.Hour),
 					Duration:     time.Hour,
-					Notification: time.Now().Add(2 * time.Hour),
+					Notification: time.Hour * 2,
 				},
 				err: nil,
 			},
@@ -65,7 +65,7 @@ func TestCreate(t *testing.T) {
 					UserId:       userId,
 					EventTime:    time.Now().Add(3 * time.Hour),
 					Duration:     time.Hour,
-					Notification: time.Now().Add(2 * time.Hour),
+					Notification: time.Hour * 2,
 				},
 				err: usecase.ErrEventTitle,
 			},
@@ -76,7 +76,7 @@ func TestCreate(t *testing.T) {
 					Desc:         "This is event with empty event time",
 					UserId:       userId,
 					Duration:     time.Hour,
-					Notification: time.Now().Add(2 * time.Hour),
+					Notification: time.Hour * 2,
 				},
 				err: usecase.ErrEventTime,
 			},
@@ -87,7 +87,7 @@ func TestCreate(t *testing.T) {
 					Desc:         "This is event with empty duration",
 					UserId:       userId,
 					EventTime:    time.Now().Add(5 * time.Hour),
-					Notification: time.Now().Add(4 * time.Hour),
+					Notification: time.Hour * 4,
 				},
 				err: usecase.ErrEventDuration,
 			},
@@ -110,7 +110,7 @@ func TestCreate(t *testing.T) {
 			UserId:       userId,
 			EventTime:    time.Date(2022, 12, 30, 15, 0, 0, 0, time.Local),
 			Duration:     time.Hour,
-			Notification: time.Now().Add(2 * time.Hour),
+			Notification: time.Hour * 2,
 		})
 		require.NoError(t, err)
 
@@ -120,7 +120,7 @@ func TestCreate(t *testing.T) {
 			UserId:       userId,
 			EventTime:    time.Date(2022, 12, 30, 15, 30, 0, 0, time.Local),
 			Duration:     time.Hour,
-			Notification: time.Now().Add(2 * time.Hour),
+			Notification: time.Hour * 2,
 		})
 		require.ErrorIs(t, err, usecase.ErrEventTimeBusy)
 
@@ -130,7 +130,7 @@ func TestCreate(t *testing.T) {
 			UserId:       userId,
 			EventTime:    time.Date(2022, 12, 30, 14, 30, 0, 0, time.Local),
 			Duration:     time.Hour,
-			Notification: time.Now().Add(2 * time.Hour),
+			Notification: time.Hour * 2,
 		})
 		require.ErrorIs(t, err, usecase.ErrEventTimeBusy)
 	})

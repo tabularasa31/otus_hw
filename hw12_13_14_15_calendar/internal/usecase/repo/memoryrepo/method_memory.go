@@ -6,7 +6,6 @@ import (
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
-
 	"sync"
 	"time"
 )
@@ -36,7 +35,8 @@ func (r *EventRepo) CreateEvent(ctx context.Context, event entity.Event) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	event.Id = int32(uuid.New().ID()) // CreateEvent unique ID
+	// CreateEvent unique ID
+	event.Id = int32(uuid.New().ID())
 
 	userEvents, ok := r.events[event.UserId]
 	if !ok {
@@ -51,26 +51,27 @@ func (r *EventRepo) CreateEvent(ctx context.Context, event entity.Event) error {
 	return nil
 }
 
-// UpdateEvent Обновить (ID события, событие);
+// UpdateEvent Обновить (ID пользователя, ID события, событие);
 func (r *EventRepo) UpdateEvent(ctx context.Context, event entity.Event) error {
 	if err := r.eventValidate(event); err != nil {
 		return err
 	}
+
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	userEvents, ok := r.events[event.UserId]
 	if !ok {
-		return usecase.ErrEventNotFound
+		return errapp.ErrEventNotFound
 	}
 
 	updatedEvent, ok := userEvents[event.Id]
 	if !ok {
-		return usecase.ErrEventNotFound
+		return errapp.ErrEventNotFound
 	}
 
 	if !r.isEventTimeBusy(userEvents, event) {
-		return usecase.ErrEventTimeBusy
+		return errapp.ErrEventTimeBusy
 	}
 
 	updatedEvent.Title = event.Title

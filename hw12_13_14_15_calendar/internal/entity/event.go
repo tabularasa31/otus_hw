@@ -5,13 +5,13 @@ import (
 )
 
 type Event struct {
-	Id           int32
-	Title        string
-	Desc         string
-	UserId       int
-	EventTime    time.Time
-	Duration     time.Duration
-	Notification time.Time
+	Id           int32         `json:"id"`
+	Title        string        `json:"title"`
+	Desc         string        `json:"desc"`
+	UserId       int           `json:"user_id"`
+	EventTime    time.Time     `json:"event_time"`
+	Duration     time.Duration `json:"duration"`
+	Notification time.Duration `json:"notification"`
 }
 
 //ID - уникальный идентификатор события (можно воспользоваться UUID);
