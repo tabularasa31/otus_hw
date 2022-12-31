@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
@@ -45,32 +46,10 @@ func NewConfig(file string) (*Config, error) {
 		return nil, err
 	}
 
-	//v := validator.New()
-	//if err = v.Struct(cfg); err != nil {
-	//	return nil, fmt.Errorf("failed config: %w", err)
-	//}
-
-	//if e := cfgValidate(*cfg); e != nil {
-	//	return nil, e
-	//}
+	v := validator.New()
+	if err = v.Struct(cfg); err != nil {
+		return nil, fmt.Errorf("failed config: %w", err)
+	}
 
 	return cfg, nil
 }
-
-// cfgValidate validate config
-//func cfgValidate(cfg Config) error {
-//	v := validator.New()
-//	if err := v.Struct(cfg); err != nil {
-//		return fmt.Errorf("failed config: %w", err)
-//	}
-//	if err := v.Struct(cfg.Storage); err != nil {
-//		return fmt.Errorf("failed Storage config: %w", err)
-//	}
-//	if err := v.Struct(cfg.HTTP); err != nil {
-//		return fmt.Errorf("failed HTTP config: %w", err)
-//	}
-//	if err := v.Struct(cfg.GRPC); err != nil {
-//		return fmt.Errorf("failed GRPS config: %w", err)
-//	}
-//	return nil
-//}
