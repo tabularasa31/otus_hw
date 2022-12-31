@@ -43,5 +43,5 @@ lint: install-lint-deps
 .PHONY: lint
 
 migrate:
-	goose -dir migrations postgres "${DB_USER}:${DB_PASSWORD}@tcp(localhost:${DB_PORT})/${DB_NAME}?parseTime=true" up
+	goose -dir migrations up
 .PHONY: migrate
