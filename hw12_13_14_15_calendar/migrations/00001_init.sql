@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS events
     descr        text,
     user_id      bigint not null ,
     event_time   timestamp(0) with time zone not null,
-    duration     time,
+    duration     time not null,
     notification time
 );
 

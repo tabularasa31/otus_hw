@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
+	"net/http"
 )
 
 // NewRouter -.
@@ -21,12 +22,18 @@ func NewRouter(handler *gin.Engine, logg logger.Interface, u usecase.EventUseCas
 	handler.Use(gin.Recovery())
 
 	// Swagger
+	//docs.SwaggerInfo.BasePath = "/api/v1"
 	swaggerHandler := ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "DISABLE_SWAGGER_HTTP_HANDLER")
 	handler.GET("/swagger/*any", swaggerHandler)
 
 	// Routers
-	h := handler.Group("/v1")
+	v1 := handler.Group("/api/v1")
 	{
-		newCalendarRoutes(h, u, logg)
+		newCalendarRoutes(v1, u, logg)
 	}
+	// Ping test
+	handler.GET("/ping", func(c *gin.Context) {
+		c.String(http.StatusOK, "pong")
+	})
+
 }

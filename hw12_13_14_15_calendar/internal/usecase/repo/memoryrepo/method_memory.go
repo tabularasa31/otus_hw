@@ -12,14 +12,14 @@ import (
 
 // EventRepo -.
 type EventRepo struct {
-	events map[int]map[int32]entity.Event
+	events map[int]map[int32]entity.EventDB
 	mu     sync.RWMutex
 }
 
 // New -.
 func New() *EventRepo {
 	m := sync.RWMutex{}
-	events := make(map[int]map[int32]entity.Event)
+	events := make(map[int]map[int32]entity.EventDB)
 	return &EventRepo{
 		events: events,
 		mu:     m,
@@ -27,60 +27,56 @@ func New() *EventRepo {
 }
 
 // CreateEvent Создать (событие)
-func (r *EventRepo) CreateEvent(ctx context.Context, event entity.Event) error {
-	if err := r.eventValidate(event); err != nil {
-		return err
-	}
-
+func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	// CreateEvent unique ID
-	event.Id = int32(uuid.New().ID())
-
-	userEvents, ok := r.events[event.UserId]
+	// Check if event time already busy
+	userEvents, ok := r.events[eventDB.UserId]
 	if !ok {
-		r.events[event.UserId] = make(map[int32]entity.Event)
+		r.events[eventDB.UserId] = make(map[int32]entity.EventDB)
+	} else {
+		if !r.isEventTimeBusy(userEvents, *eventDB) {
+			return nil, usecase.ErrEventTimeBusy
+		}
 	}
 
-	if !r.isEventTimeBusy(userEvents, event) {
-		return usecase.ErrEventTimeBusy
-	}
+	// Create unique event ID
+	eventDB.Id = int32(uuid.New().ID())
 
-	r.events[event.UserId][event.Id] = event
-	return nil
+	r.events[eventDB.UserId][eventDB.Id] = *eventDB
+	res := r.events[eventDB.UserId][eventDB.Id]
+
+	return res.Dto(), nil
 }
 
 // UpdateEvent Обновить (ID пользователя, ID события, событие);
-func (r *EventRepo) UpdateEvent(ctx context.Context, event entity.Event) error {
-	if err := r.eventValidate(event); err != nil {
-		return err
-	}
-
+func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	userEvents, ok := r.events[event.UserId]
+	userEvents, ok := r.events[eventDB.UserId]
 	if !ok {
-		return errapp.ErrEventNotFound
+		return nil, errapp.ErrEventNotFound
 	}
 
-	updatedEvent, ok := userEvents[event.Id]
+	updatedEvent, ok := userEvents[eventDB.Id]
 	if !ok {
-		return errapp.ErrEventNotFound
+		return nil, errapp.ErrEventNotFound
 	}
 
-	if !r.isEventTimeBusy(userEvents, event) {
-		return errapp.ErrEventTimeBusy
+	if !r.isEventTimeBusy(userEvents, *eventDB) {
+		return nil, errapp.ErrEventTimeBusy
 	}
 
-	updatedEvent.Title = event.Title
-	updatedEvent.Desc = event.Desc
-	updatedEvent.EventTime = event.EventTime
-	updatedEvent.Duration = event.Duration
+	updatedEvent.Title = eventDB.Title
+	updatedEvent.Desc = eventDB.Desc
+	updatedEvent.EventTime = eventDB.EventTime
+	updatedEvent.Duration = eventDB.Duration
 
-	r.events[event.UserId][event.Id] = updatedEvent
-	return nil
+	r.events[eventDB.UserId][eventDB.Id] = updatedEvent
+	res := r.events[eventDB.UserId][eventDB.Id]
+	return res.Dto(), nil
 }
 
 // DeleteEvent Удалить (ID события);
@@ -99,18 +95,18 @@ func (r *EventRepo) DeleteEvent(ctx context.Context, Id int32) error {
 
 // GetDailyEvents СписокСобытийНаДень (дата);
 // Выводит все события, которые начинаются в заданный день
-func (r *EventRepo) GetDailyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 
-	day := date.Day()
+	day := eventDB.EventTime.Day()
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	for _, userEvents := range r.events {
-		for _, event := range userEvents {
-			if event.EventTime.Day() == day {
-				events = append(events, event)
+		for _, evDB := range userEvents {
+			if evDB.EventTime.Day() == day {
+				events = append(events, *evDB.Dto())
 			}
 		}
 	}
@@ -119,18 +115,18 @@ func (r *EventRepo) GetDailyEvents(ctx context.Context, date time.Time) ([]entit
 
 // GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели);
 // Выводит список событий за 7 дней, начиная с дня начала
-func (r *EventRepo) GetWeeklyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 
-	endDay := date.Add(7 * 24 * time.Hour)
+	endDay := eventDB.EventTime.Add(7 * 24 * time.Hour)
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	for _, userEvents := range r.events {
-		for _, event := range userEvents {
-			if event.EventTime.After(date) && event.EventTime.Before(endDay) {
-				events = append(events, event)
+		for _, evDB := range userEvents {
+			if evDB.EventTime.After(eventDB.EventTime) && evDB.EventTime.Before(endDay) {
+				events = append(events, *evDB.Dto())
 			}
 		}
 	}
@@ -139,18 +135,18 @@ func (r *EventRepo) GetWeeklyEvents(ctx context.Context, date time.Time) ([]enti
 
 // GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца)
 // Выводит список событий за 30 дней, начиная с дня начала
-func (r *EventRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
+func (r *EventRepo) GetMonthlyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 
-	endDay := date.Add(7 * 24 * 30 * time.Hour)
+	endDay := eventDB.EventTime.Add(7 * 24 * 30 * time.Hour)
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	for _, userEvents := range r.events {
-		for _, event := range userEvents {
-			if event.EventTime.After(date) && event.EventTime.Before(endDay) {
-				events = append(events, event)
+		for _, evDB := range userEvents {
+			if evDB.EventTime.After(eventDB.EventTime) && evDB.EventTime.Before(endDay) {
+				events = append(events, *evDB.Dto())
 			}
 		}
 	}
@@ -158,7 +154,7 @@ func (r *EventRepo) GetMonthlyEvents(ctx context.Context, date time.Time) ([]ent
 }
 
 // isEventTimeBusy проверка на занятость в заданное время
-func (r *EventRepo) isEventTimeBusy(userEvents map[int32]entity.Event, newEvent entity.Event) bool {
+func (r *EventRepo) isEventTimeBusy(userEvents map[int32]entity.EventDB, newEvent entity.EventDB) bool {
 	newStartTime := newEvent.EventTime
 	newEndTime := newEvent.EventTime.Add(newEvent.Duration)
 	for _, userEvent := range userEvents {
@@ -170,19 +166,4 @@ func (r *EventRepo) isEventTimeBusy(userEvents map[int32]entity.Event, newEvent 
 		}
 	}
 	return true
-}
-
-// eventValidate проверка ивента на валидность полей
-func (r *EventRepo) eventValidate(event entity.Event) error {
-	switch {
-	case event.Title == "":
-		return errapp.ErrEventTitle
-	case event.UserId == 0:
-		return errapp.ErrEventUserID
-	case event.EventTime.IsZero():
-		return errapp.ErrEventTime
-	case event.Duration == 0:
-		return errapp.ErrEventDuration
-	}
-	return nil
 }
