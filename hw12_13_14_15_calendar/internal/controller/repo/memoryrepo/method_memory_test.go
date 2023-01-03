@@ -13,7 +13,7 @@ import (
 func TestCreate(t *testing.T) {
 	type Case struct {
 		name  string
-		event entity.Event
+		event entity.EventDB
 		err   error
 	}
 	t.Run("success event create", func(t *testing.T) {
@@ -21,7 +21,7 @@ func TestCreate(t *testing.T) {
 		cases := []Case{
 			{
 				name: "success event create one",
-				event: entity.Event{
+				event: entity.EventDB{
 					Title:        "event 1",
 					Desc:         "This is event one",
 					UserId:       userId,
@@ -33,7 +33,7 @@ func TestCreate(t *testing.T) {
 			},
 			{
 				name: "success event create two",
-				event: entity.Event{
+				event: entity.EventDB{
 					Title:        "event 2",
 					Desc:         "This is event two",
 					UserId:       userId,
@@ -45,10 +45,10 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		repo := New()
+		eventRepo := New()
 		for _, c := range cases {
 			t.Run(c.name, func(t *testing.T) {
-				err := repo.CreateEvent(context.Background(), c.event)
+				_, err := eventRepo.CreateEvent(context.Background(), &c.event)
 				require.ErrorIs(t, err, c.err)
 			})
 		}
@@ -59,7 +59,7 @@ func TestCreate(t *testing.T) {
 		cases := []Case{
 			{
 				name: "invalid title",
-				event: entity.Event{
+				event: entity.EventDB{
 					Title:        "",
 					Desc:         "This is event with empty title",
 					UserId:       userId,
@@ -71,7 +71,7 @@ func TestCreate(t *testing.T) {
 			},
 			{
 				name: "empty time of event",
-				event: entity.Event{
+				event: entity.EventDB{
 					Title:        "Title 333",
 					Desc:         "This is event with empty event time",
 					UserId:       userId,
@@ -82,7 +82,7 @@ func TestCreate(t *testing.T) {
 			},
 			{
 				name: "empty duration",
-				event: entity.Event{
+				event: entity.EventDB{
 					Title:        "Title 222",
 					Desc:         "This is event with empty duration",
 					UserId:       userId,
@@ -92,10 +92,10 @@ func TestCreate(t *testing.T) {
 				err: repo.ErrEventDuration,
 			},
 		}
-		stor := New()
+		eventRepo := New()
 		for _, c := range cases {
 			t.Run(c.name, func(t *testing.T) {
-				err := stor.CreateEvent(context.Background(), c.event)
+				_, err := eventRepo.CreateEvent(context.Background(), &c.event)
 				require.ErrorIs(t, err, c.err)
 			})
 		}
@@ -103,8 +103,8 @@ func TestCreate(t *testing.T) {
 
 	t.Run("event time busy", func(t *testing.T) {
 		userId := int(uuid.New().ID())
-		stor := New()
-		err := stor.CreateEvent(context.Background(), entity.Event{
+		eventRepo := New()
+		_, err := eventRepo.CreateEvent(context.Background(), &entity.EventDB{
 			Title:        "event one",
 			Desc:         "event one",
 			UserId:       userId,
@@ -114,7 +114,7 @@ func TestCreate(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		err = stor.CreateEvent(context.Background(), entity.Event{
+		_, err = eventRepo.CreateEvent(context.Background(), &entity.EventDB{
 			Title:        "event two",
 			Desc:         "event two",
 			UserId:       userId,
@@ -124,7 +124,7 @@ func TestCreate(t *testing.T) {
 		})
 		require.ErrorIs(t, err, repo.ErrEventTimeBusy)
 
-		err = stor.CreateEvent(context.Background(), entity.Event{
+		_, err = eventRepo.CreateEvent(context.Background(), &entity.EventDB{
 			Title:        "event three",
 			Desc:         "event three",
 			UserId:       userId,
