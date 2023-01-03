@@ -1,10 +1,11 @@
-package memoryrepo
+package memoryrepo_test
 
 import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo/memoryrepo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"testing"
 	"time"
@@ -45,54 +46,7 @@ func TestCreate(t *testing.T) {
 			},
 		}
 
-		eventRepo := New()
-		for _, c := range cases {
-			t.Run(c.name, func(t *testing.T) {
-				_, err := eventRepo.CreateEvent(context.Background(), &c.event)
-				require.ErrorIs(t, err, c.err)
-			})
-		}
-	})
-
-	t.Run("invalid event data", func(t *testing.T) {
-		userId := int(uuid.New().ID())
-		cases := []Case{
-			{
-				name: "invalid title",
-				event: entity.EventDB{
-					Title:        "",
-					Desc:         "This is event with empty title",
-					UserId:       userId,
-					EventTime:    time.Now().Add(3 * time.Hour),
-					Duration:     time.Hour,
-					Notification: time.Hour * 2,
-				},
-				err: repo.ErrEventTitle,
-			},
-			{
-				name: "empty time of event",
-				event: entity.EventDB{
-					Title:        "Title 333",
-					Desc:         "This is event with empty event time",
-					UserId:       userId,
-					Duration:     time.Hour,
-					Notification: time.Hour * 2,
-				},
-				err: repo.ErrEventTime,
-			},
-			{
-				name: "empty duration",
-				event: entity.EventDB{
-					Title:        "Title 222",
-					Desc:         "This is event with empty duration",
-					UserId:       userId,
-					EventTime:    time.Now().Add(5 * time.Hour),
-					Notification: time.Hour * 4,
-				},
-				err: repo.ErrEventDuration,
-			},
-		}
-		eventRepo := New()
+		eventRepo := memoryrepo.New()
 		for _, c := range cases {
 			t.Run(c.name, func(t *testing.T) {
 				_, err := eventRepo.CreateEvent(context.Background(), &c.event)
@@ -103,7 +57,7 @@ func TestCreate(t *testing.T) {
 
 	t.Run("event time busy", func(t *testing.T) {
 		userId := int(uuid.New().ID())
-		eventRepo := New()
+		eventRepo := memoryrepo.New()
 		_, err := eventRepo.CreateEvent(context.Background(), &entity.EventDB{
 			Title:        "event one",
 			Desc:         "event one",

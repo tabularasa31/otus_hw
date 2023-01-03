@@ -27,7 +27,7 @@ type (
 //За сколько времени высылать уведомление, опционально.
 
 func (e *Event) Dao() (*EventDB, error) {
-	if err := e.eventValidate; err != nil {
+	if err := e.eventValidate(); err != nil {
 		return nil, fmt.Errorf("error event validation: %w", err)
 	}
 
