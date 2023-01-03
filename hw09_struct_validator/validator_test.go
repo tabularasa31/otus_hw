@@ -2,13 +2,16 @@ package hw09structvalidator
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
 
-// Test the function on different structures and other types.
 type (
 	User struct {
 		ID     string `json:"id" validate:"len:36"`
@@ -42,19 +45,74 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in:          Response{100, ""},
+			expectedErr: errors.New("not in these mass of int , "),
 		},
-		// ...
-		// Place your code here.
+		{
+			in: User{
+				ID:     "1002340",
+				Age:    67,
+				Email:  "info@example.com",
+				Role:   "admin",
+				Phones: []string{"79061234567", "79012345678"},
+			},
+			expectedErr: errors.New("len is not equal 36, greater then 50, "),
+		},
+		{
+			in: User{
+				ID:     "1002345640",
+				Age:    30,
+				Email:  "info@examplecom",
+				Role:   "admin",
+				Phones: []string{"79061234567", "79012345678"},
+				meta: []byte(`[
+					{"Space": "YCbCr", "Point": {"Y": 255, "Cb": 0, "Cr": -10}},
+					{"Space": "RGB",   "Point": {"R": 98, "G": 218, "B": 255}}	
+					]`),
+			},
+			expectedErr: errors.New("len is not equal 36, string is not matched regexp expression , "),
+		},
+		{
+			in: User{
+				ID:     "10024567890340",
+				Age:    37,
+				Email:  "info@example.com",
+				Role:   "manager",
+				Phones: []string{"79061234567", "7901234678"},
+			},
+			expectedErr: errors.New("len is not equal 36, not in these mass of strings , len is not equal 11, "),
+		},
+		{
+			in:          App{"v.10"},
+			expectedErr: errors.New("len is not equal 5, "),
+		},
+		{
+			in:          Response{Code: 505},
+			expectedErr: errors.New("not in these mass of int , "),
+		},
+		{
+			in:          Token{Header: []byte{4, 5}},
+			expectedErr: errors.New(""),
+		},
 	}
+
+	t.Run("not struct case", func(t *testing.T) {
+		in := "not struct"
+		err := Validate(in)
+		require.EqualError(t, err, ErrNotStruct.Error())
+	})
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
 			tt := tt
 			t.Parallel()
+			err := Validate(tt.in)
 
-			// Place your code here.
-			_ = tt
+			if tt.expectedErr == nil {
+				assert.Nil(t, err)
+			} else {
+				assert.Equal(t, tt.expectedErr.Error(), err.Error())
+			}
 		})
 	}
 }

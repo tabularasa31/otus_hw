@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"net"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -12,6 +14,7 @@ import (
 )
 
 func TestTelnetClient(t *testing.T) {
+	ctx := context.Background()
 	t.Run("basic", func(t *testing.T) {
 		l, err := net.Listen("tcp", "127.0.0.1:")
 		require.NoError(t, err)
@@ -29,7 +32,7 @@ func TestTelnetClient(t *testing.T) {
 			timeout, err := time.ParseDuration("10s")
 			require.NoError(t, err)
 
-			client := NewTelnetClient(l.Addr().String(), timeout, ioutil.NopCloser(in), out)
+			client := NewTelnetClient(ctx, l.Addr().String(), timeout, ioutil.NopCloser(in), out)
 			require.NoError(t, client.Connect())
 			defer func() { require.NoError(t, client.Close()) }()
 
@@ -61,5 +64,17 @@ func TestTelnetClient(t *testing.T) {
 		}()
 
 		wg.Wait()
+	})
+	t.Run("wrong host", func(t *testing.T) {
+		d, err := time.ParseDuration("10s")
+		require.NoError(t, err)
+		client := NewTelnetClient(ctx, "1example.com", d, os.Stdin, os.Stdout)
+		require.Error(t, client.Connect())
+	})
+	t.Run("wrong port", func(t *testing.T) {
+		d, err := time.ParseDuration("10s")
+		require.NoError(t, err)
+		client := NewTelnetClient(ctx, "example.com:w", d, os.Stdin, os.Stdout)
+		require.Error(t, client.Connect())
 	})
 }
