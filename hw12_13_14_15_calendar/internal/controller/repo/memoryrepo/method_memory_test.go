@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	"testing"
 	"time"
 )
@@ -67,7 +67,7 @@ func TestCreate(t *testing.T) {
 					Duration:     time.Hour,
 					Notification: time.Hour * 2,
 				},
-				err: usecase.ErrEventTitle,
+				err: repo.ErrEventTitle,
 			},
 			{
 				name: "empty time of event",
@@ -78,7 +78,7 @@ func TestCreate(t *testing.T) {
 					Duration:     time.Hour,
 					Notification: time.Hour * 2,
 				},
-				err: usecase.ErrEventTime,
+				err: repo.ErrEventTime,
 			},
 			{
 				name: "empty duration",
@@ -89,7 +89,7 @@ func TestCreate(t *testing.T) {
 					EventTime:    time.Now().Add(5 * time.Hour),
 					Notification: time.Hour * 4,
 				},
-				err: usecase.ErrEventDuration,
+				err: repo.ErrEventDuration,
 			},
 		}
 		stor := New()
@@ -122,7 +122,7 @@ func TestCreate(t *testing.T) {
 			Duration:     time.Hour,
 			Notification: time.Hour * 2,
 		})
-		require.ErrorIs(t, err, usecase.ErrEventTimeBusy)
+		require.ErrorIs(t, err, repo.ErrEventTimeBusy)
 
 		err = stor.CreateEvent(context.Background(), entity.Event{
 			Title:        "event three",
@@ -132,6 +132,6 @@ func TestCreate(t *testing.T) {
 			Duration:     time.Hour,
 			Notification: time.Hour * 2,
 		})
-		require.ErrorIs(t, err, usecase.ErrEventTimeBusy)
+		require.ErrorIs(t, err, repo.ErrEventTimeBusy)
 	})
 }

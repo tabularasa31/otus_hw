@@ -3,9 +3,8 @@ package memoryrepo
 import (
 	"context"
 	"github.com/google/uuid"
+	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
-	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	"sync"
 	"time"
 )
@@ -37,7 +36,7 @@ func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 		r.events[eventDB.UserId] = make(map[int32]entity.EventDB)
 	} else {
 		if !r.isEventTimeBusy(userEvents, *eventDB) {
-			return nil, usecase.ErrEventTimeBusy
+			return nil, errapp.ErrEventTimeBusy
 		}
 	}
 
@@ -90,7 +89,7 @@ func (r *EventRepo) DeleteEvent(ctx context.Context, Id int32) error {
 			return nil
 		}
 	}
-	return usecase.ErrEventNotFound
+	return errapp.ErrEventNotFound
 }
 
 // GetDailyEvents СписокСобытийНаДень (дата);
