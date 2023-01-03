@@ -19,12 +19,14 @@ func New(r EventRepo) *EventUseCase {
 }
 
 func (u *EventUseCase) Create(ctx context.Context, event entity.Event) (*entity.Event, error) {
-
 	eventDB, err := event.Dao()
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - Create - event.Dao: %w", err)
+	}
 
 	res, err := u.repo.CreateEvent(ctx, eventDB)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - CreateEvent - u.repo.CreateEvent: %w", err)
+		return nil, fmt.Errorf("EventUseCase - Create - u.repo.CreateEvent: %w", err)
 	}
 
 	return res, nil
@@ -32,10 +34,13 @@ func (u *EventUseCase) Create(ctx context.Context, event entity.Event) (*entity.
 
 func (u *EventUseCase) Update(ctx context.Context, event entity.Event) (*entity.Event, error) {
 	eventDB, err := event.Dao()
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - Update - event.Dao: %w", err)
+	}
 
 	res, err := u.repo.UpdateEvent(ctx, eventDB)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - UpdateEvent - u.repo.UpdateEvent: %w", err)
+		return nil, fmt.Errorf("EventUseCase - Update - u.repo.UpdateEvent: %w", err)
 	}
 	return res, nil
 }
@@ -50,26 +55,35 @@ func (u *EventUseCase) Delete(ctx context.Context, userID int32) error {
 
 func (u *EventUseCase) DailyEvents(ctx context.Context, event entity.Event) ([]entity.Event, error) {
 	eventDB, err := event.Dao()
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - DailyEvents - event.Dao: %w", err)
+	}
 
 	events, err := u.repo.GetDailyEvents(ctx, eventDB)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - GetDailyEvents - u.repo.GetDailyEvents: %w", err)
+		return nil, fmt.Errorf("EventUseCase - DailyEvents - u.repo.GetDailyEvents: %w", err)
 	}
 	return events, nil
 }
 
 func (u *EventUseCase) WeeklyEvents(ctx context.Context, event entity.Event) ([]entity.Event, error) {
 	eventDB, err := event.Dao()
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - WeeklyEvents - event.Dao: %w", err)
+	}
 
 	events, err := u.repo.GetWeeklyEvents(ctx, eventDB)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - GetWeeklyEvents - u.repo.GetWeeklyEvents: %w", err)
+		return nil, fmt.Errorf("EventUseCase - WeeklyEvents - u.repo.GetWeeklyEvents: %w", err)
 	}
 	return events, nil
 }
 
 func (u *EventUseCase) MonthlyEvents(ctx context.Context, event entity.Event) ([]entity.Event, error) {
 	eventDB, err := event.Dao()
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - MonthlyEvents - event.Dao: %w", err)
+	}
 
 	events, err := u.repo.GetMonthlyEvents(ctx, eventDB)
 	if err != nil {

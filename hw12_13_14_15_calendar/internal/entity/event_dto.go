@@ -8,23 +8,15 @@ import (
 
 type (
 	Event struct {
-		Id           int32  `json:"id" example:"auto"`
+		ID           int32  `json:"id" example:"auto"`
 		Title        string `json:"title" binding:"required" example:"title"`
 		Desc         string `json:"desc" binding:"required" example:"description"`
-		UserId       int    `json:"user_id" binding:"required" example:"user id"`
-		EventTime    string `json:"event_time" binding:"required" example:"start event time in RFC3339 format"`
+		UserID       int    `json:"userId" binding:"required" example:"user id"`
+		EventTime    string `json:"eventTime" binding:"required" example:"start event time in RFC3339 format"`
 		Duration     string `json:"duration" binding:"required" example:"event duration in time.Duration format"`
-		Notification string `json:"notification" binding:"required" example:"за сколько времени до начала события прислать уведомление in time.Duration format"`
+		Notification string `json:"notification" binding:"required" example:"event notification in time.Duration format"`
 	}
 )
-
-//ID - уникальный идентификатор события (можно воспользоваться UUID);
-//Заголовок - короткий текст;
-//Дата и время события;
-//Длительность события (или дата и время окончания);
-//Описание события - длинный текст, опционально;
-//ID пользователя, владельца события;
-//За сколько времени высылать уведомление, опционально.
 
 func (e *Event) Dao() (*EventDB, error) {
 	if err := e.eventValidate(); err != nil {
@@ -49,7 +41,7 @@ func (e *Event) Dao() (*EventDB, error) {
 	eventDB := EventDB{
 		Title:        e.Title,
 		Desc:         e.Desc,
-		UserId:       e.UserId,
+		UserID:       e.UserID,
 		EventTime:    date,
 		Duration:     d,
 		Notification: n,
@@ -63,7 +55,7 @@ func (e *Event) eventValidate() error {
 	switch {
 	case e.Title == "":
 		return errapp.ErrEventTitle
-	case e.UserId == 0:
+	case e.UserID == 0:
 		return errapp.ErrEventUserID
 	case e.EventTime == "":
 		return errapp.ErrEventTime

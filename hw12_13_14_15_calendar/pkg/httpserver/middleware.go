@@ -2,8 +2,9 @@ package httpserver
 
 import (
 	"fmt"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 	"net/http"
+
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 )
 
 func loggingMiddleware(h http.Handler, l logger.Logger) http.Handler {

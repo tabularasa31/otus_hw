@@ -18,9 +18,8 @@ func New(pg *postgres.Postgres) *EventRepo {
 	return &EventRepo{pg}
 }
 
-// CreateEvent Создать (событие)
+// CreateEvent Создать (событие).
 func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
-
 	check, er := r.isEventTimeBusy(*eventDB)
 	if !check {
 		return nil, errapp.ErrEventTimeBusy
@@ -34,7 +33,7 @@ func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 			  RETURNING id`
 
 	args := map[string]interface{}{
-		"user_id":    eventDB.UserId,
+		"user_id":    eventDB.UserID,
 		"title":      eventDB.Title,
 		"descr":      eventDB.Desc,
 		"event_time": eventDB.EventTime,
@@ -53,9 +52,8 @@ func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 	return res, nil
 }
 
-// UpdateEvent Обновить (событие)
+// UpdateEvent Обновить (событие).
 func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
-
 	check, er := r.isEventTimeBusy(*eventDB)
 	if !check {
 		return nil, errapp.ErrEventTimeBusy
@@ -74,8 +72,8 @@ func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 				WHERE id = :id`
 
 	args := map[string]interface{}{
-		"id":           eventDB.Id,
-		"user_Id":      eventDB.UserId,
+		"id":           eventDB.ID,
+		"user_Id":      eventDB.UserID,
 		"title":        eventDB.Title,
 		"descr":        eventDB.Desc,
 		"event_time":   eventDB.EventTime,
@@ -96,14 +94,14 @@ func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 	return res, nil
 }
 
-// DeleteEvent Удалить (ID события);
-func (r *EventRepo) DeleteEvent(ctx context.Context, Id int32) error {
-	_, err := r.Postgres.Pool.Exec(ctx, `delete from events where id = $1`, Id)
+// DeleteEvent Удалить (ID события).
+func (r *EventRepo) DeleteEvent(ctx context.Context, id int32) error {
+	_, err := r.Postgres.Pool.Exec(ctx, `delete from events where id = $1`, id)
 	return err
 }
 
-// GetDailyEvents СписокСобытийНаДень (дата);
-// Выводит все события, которые начинаются в заданный день
+// GetDailyEvents СписокСобытийНаДень (дата).
+// Выводит все события, которые начинаются в заданный день.
 func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 
@@ -122,8 +120,8 @@ func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB)
 
 	for rows.Next() {
 		var event entity.EventDB
-		if er := rows.Scan(&event.Id, &event.Title, &event.Desc,
-			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); er != nil {
+		if er := rows.Scan(&event.ID, &event.Title, &event.Desc,
+			&event.UserID, &event.EventTime, &event.Duration, &event.Notification); er != nil {
 			return events, er
 		}
 		events = append(events, *event.Dto())
@@ -132,8 +130,8 @@ func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB)
 	return events, nil
 }
 
-// GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели);
-// Выводит список событий за 7 дней, начиная с дня начала
+// GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели).
+// Выводит список событий за 7 дней, начиная с дня начала.
 func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
@@ -151,8 +149,8 @@ func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB
 
 	for rows.Next() {
 		var event entity.EventDB
-		if e := rows.Scan(&event.Id, &event.Title, &event.Desc,
-			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); e != nil {
+		if e := rows.Scan(&event.ID, &event.Title, &event.Desc,
+			&event.UserID, &event.EventTime, &event.Duration, &event.Notification); e != nil {
 			return events, e
 		}
 		events = append(events, *event.Dto())
@@ -160,8 +158,8 @@ func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB
 	return events, nil
 }
 
-// GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца)
-// Выводит список событий за 30 дней, начиная с дня начала
+// GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца).
+// Выводит список событий за 30 дней, начиная с дня начала.
 func (r *EventRepo) GetMonthlyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 	query := `SELECT id, title, descr, user_id, event_time, duration, notification
@@ -179,8 +177,8 @@ func (r *EventRepo) GetMonthlyEvents(ctx context.Context, eventDB *entity.EventD
 
 	for rows.Next() {
 		var event entity.EventDB
-		if e := rows.Scan(&event.Id, &event.Title, &event.Desc,
-			&event.UserId, &event.EventTime, &event.Duration, &event.Notification); e != nil {
+		if e := rows.Scan(&event.ID, &event.Title, &event.Desc,
+			&event.UserID, &event.EventTime, &event.Duration, &event.Notification); e != nil {
 			return events, e
 		}
 		events = append(events, *event.Dto())
@@ -188,7 +186,7 @@ func (r *EventRepo) GetMonthlyEvents(ctx context.Context, eventDB *entity.EventD
 	return events, nil
 }
 
-// isEventTimeBusy проверка на занятость времени
+// isEventTimeBusy проверка на занятость времени.
 func (r *EventRepo) isEventTimeBusy(event entity.EventDB) (bool, error) {
 	query := `SELECT id 
 			  FROM events 
@@ -196,7 +194,7 @@ func (r *EventRepo) isEventTimeBusy(event entity.EventDB) (bool, error) {
 			    AND event_time BETWEEN :event_time AND :end_time
 			  LIMIT 1`
 	args := map[string]interface{}{
-		"user_id":    event.UserId,
+		"user_id":    event.UserID,
 		"event_time": event.EventTime,
 		"end_time":   event.EventTime.Add(event.Duration),
 	}
@@ -220,7 +218,7 @@ func (r *EventRepo) result(ctx context.Context, id string) (*entity.Event, error
 	res := entity.Event{}
 
 	for rows.Next() {
-		er := rows.Scan(&res.Id, &res.Title, &res.Desc, &res.UserId, &res.EventTime, &res.Duration, &res.Notification)
+		er := rows.Scan(&res.ID, &res.Title, &res.Desc, &res.UserID, &res.EventTime, &res.Duration, &res.Notification)
 		if er != nil {
 			return nil, err
 		}

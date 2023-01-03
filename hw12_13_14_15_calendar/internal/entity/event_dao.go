@@ -1,16 +1,17 @@
 package entity
 
 import (
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/date_utils"
 	"time"
+
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/date_utils"
 )
 
 type (
 	EventDB struct {
-		Id           int32
+		ID           int32
 		Title        string
 		Desc         string
-		UserId       int
+		UserID       int
 		EventTime    time.Time
 		Duration     time.Duration
 		Notification time.Duration
@@ -27,7 +28,7 @@ func (e *EventDB) Dto() *Event {
 	event := Event{
 		Title:        e.Title,
 		Desc:         e.Desc,
-		UserId:       e.UserId,
+		UserID:       e.UserID,
 		EventTime:    date,
 		Duration:     d,
 		Notification: n,

@@ -1,12 +1,13 @@
 package v1
 
 import (
+	"net/http"
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
-	"net/http"
-	"strconv"
 )
 
 type calendarRoutes struct {
@@ -37,7 +38,7 @@ func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l logge
 // @Success     201 {object} entity.Event
 // @Failure     400 {object} response
 // @Failure     500 {object} response
-// @Router      /event/create [post]
+// @Router      /event/create [post].
 func (r *calendarRoutes) create(c *gin.Context) {
 	var req entity.Event
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -52,7 +53,7 @@ func (r *calendarRoutes) create(c *gin.Context) {
 		entity.Event{
 			Title:        req.Title,
 			Desc:         req.Desc,
-			UserId:       req.UserId,
+			UserID:       req.UserID,
 			EventTime:    req.EventTime,
 			Duration:     req.Duration,
 			Notification: req.Notification,
@@ -77,7 +78,7 @@ func (r *calendarRoutes) create(c *gin.Context) {
 // @Success     200 {object} entity.Event
 // @Failure     400 {object} response
 // @Failure     500 {object} response
-// @Router      /event/update [post]
+// @Router      /event/update [post].
 func (r *calendarRoutes) update(c *gin.Context) {
 	var req entity.Event
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -91,7 +92,7 @@ func (r *calendarRoutes) update(c *gin.Context) {
 		entity.Event{
 			Title:        req.Title,
 			Desc:         req.Desc,
-			UserId:       req.UserId,
+			UserID:       req.UserID,
 			EventTime:    req.EventTime,
 			Duration:     req.Duration,
 			Notification: req.Notification,
@@ -116,7 +117,7 @@ func (r *calendarRoutes) update(c *gin.Context) {
 // @Success     200
 // @Failure     400
 // @Failure     500
-// @Router      /event/delete [post]
+// @Router      /event/delete [post].
 func (r *calendarRoutes) delete(c *gin.Context) {
 	var req int32
 	if err := c.Bind(&req); err != nil {
@@ -126,7 +127,6 @@ func (r *calendarRoutes) delete(c *gin.Context) {
 		return
 	}
 	err := r.u.Delete(c.Request.Context(), req)
-
 	if err != nil {
 		r.l.Error(err, "http - v1 - delete")
 		errorResponse(c, http.StatusInternalServerError, "event deleting problems")
@@ -146,9 +146,9 @@ func (r *calendarRoutes) delete(c *gin.Context) {
 // @Success     200 {object} []entity.Event
 // @Failure     400 {object} response
 // @Failure     500 {object} response
-// @Router      /event/update [get]
+// @Router      /event/update [get].
 func (r *calendarRoutes) daily(c *gin.Context) {
-	userId, err := strconv.Atoi(c.Params.ByName("user"))
+	userID, err := strconv.Atoi(c.Params.ByName("user"))
 	if err != nil {
 		r.l.Error(err, "http - v1 - daily")
 		errorResponse(c, http.StatusBadRequest, "invalid request")
@@ -167,7 +167,7 @@ func (r *calendarRoutes) daily(c *gin.Context) {
 	result, err := r.u.DailyEvents(
 		c.Request.Context(),
 		entity.Event{
-			UserId:    userId,
+			UserID:    userID,
 			EventTime: date,
 		},
 	)
@@ -182,7 +182,7 @@ func (r *calendarRoutes) daily(c *gin.Context) {
 }
 
 func (r *calendarRoutes) weekly(c *gin.Context) {
-	userId, err := strconv.Atoi(c.Params.ByName("user"))
+	userID, err := strconv.Atoi(c.Params.ByName("user"))
 	if err != nil {
 		r.l.Error(err, "http - v1 - weekly")
 		errorResponse(c, http.StatusBadRequest, "invalid request")
@@ -200,7 +200,7 @@ func (r *calendarRoutes) weekly(c *gin.Context) {
 	result, err := r.u.WeeklyEvents(
 		c.Request.Context(),
 		entity.Event{
-			UserId:    userId,
+			UserID:    userID,
 			EventTime: date,
 		},
 	)
@@ -215,7 +215,7 @@ func (r *calendarRoutes) weekly(c *gin.Context) {
 }
 
 func (r *calendarRoutes) monthly(c *gin.Context) {
-	userId, err := strconv.Atoi(c.Params.ByName("user"))
+	userID, err := strconv.Atoi(c.Params.ByName("user"))
 	if err != nil {
 		r.l.Error(err, "http - v1 - monthly")
 		errorResponse(c, http.StatusBadRequest, "invalid request")
@@ -233,7 +233,7 @@ func (r *calendarRoutes) monthly(c *gin.Context) {
 	result, err := r.u.MonthlyEvents(
 		c.Request.Context(),
 		entity.Event{
-			UserId:    userId,
+			UserID:    userID,
 			EventTime: date,
 		},
 	)

@@ -12,7 +12,7 @@ import (
 // EventRepo -.
 type EventRepo struct {
 	events map[int]map[int32]entity.EventDB
-	mu     sync.RWMutex
+	mu     *sync.RWMutex
 }
 
 // New -.
@@ -21,45 +21,43 @@ func New() *EventRepo {
 	events := make(map[int]map[int32]entity.EventDB)
 	return &EventRepo{
 		events: events,
-		mu:     m,
+		mu:     &m,
 	}
 }
 
-// CreateEvent Создать (событие)
+// CreateEvent Создать (событие).
 func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	// Check if event time already busy
-	userEvents, ok := r.events[eventDB.UserId]
+	userEvents, ok := r.events[eventDB.UserID]
 	if !ok {
-		r.events[eventDB.UserId] = make(map[int32]entity.EventDB)
-	} else {
-		if !r.isEventTimeBusy(userEvents, *eventDB) {
-			return nil, errapp.ErrEventTimeBusy
-		}
+		r.events[eventDB.UserID] = make(map[int32]entity.EventDB)
+	} else if !r.isEventTimeBusy(userEvents, *eventDB) {
+		return nil, errapp.ErrEventTimeBusy
 	}
 
 	// Create unique event ID
-	eventDB.Id = int32(uuid.New().ID())
+	eventDB.ID = int32(uuid.New().ID())
 
-	r.events[eventDB.UserId][eventDB.Id] = *eventDB
-	res := r.events[eventDB.UserId][eventDB.Id]
+	r.events[eventDB.UserID][eventDB.ID] = *eventDB
+	res := r.events[eventDB.UserID][eventDB.ID]
 
 	return res.Dto(), nil
 }
 
-// UpdateEvent Обновить (ID пользователя, ID события, событие);
+// UpdateEvent Обновить (ID пользователя, ID события, событие).
 func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	userEvents, ok := r.events[eventDB.UserId]
+	userEvents, ok := r.events[eventDB.UserID]
 	if !ok {
 		return nil, errapp.ErrEventNotFound
 	}
 
-	updatedEvent, ok := userEvents[eventDB.Id]
+	updatedEvent, ok := userEvents[eventDB.ID]
 	if !ok {
 		return nil, errapp.ErrEventNotFound
 	}
@@ -73,27 +71,27 @@ func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 	updatedEvent.EventTime = eventDB.EventTime
 	updatedEvent.Duration = eventDB.Duration
 
-	r.events[eventDB.UserId][eventDB.Id] = updatedEvent
-	res := r.events[eventDB.UserId][eventDB.Id]
+	r.events[eventDB.UserID][eventDB.ID] = updatedEvent
+	res := r.events[eventDB.UserID][eventDB.ID]
 	return res.Dto(), nil
 }
 
-// DeleteEvent Удалить (ID события);
-func (r *EventRepo) DeleteEvent(ctx context.Context, Id int32) error {
+// DeleteEvent Удалить (ID события).
+func (r *EventRepo) DeleteEvent(ctx context.Context, id int32) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	for _, userEvents := range r.events {
-		if _, ok := userEvents[Id]; !ok {
-			delete(userEvents, Id)
+		if _, ok := userEvents[id]; !ok {
+			delete(userEvents, id)
 			return nil
 		}
 	}
 	return errapp.ErrEventNotFound
 }
 
-// GetDailyEvents СписокСобытийНаДень (дата);
-// Выводит все события, которые начинаются в заданный день
+// GetDailyEvents СписокСобытийНаДень (дата).
+// Выводит все события, которые начинаются в заданный день.
 func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 
@@ -112,8 +110,8 @@ func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB)
 	return events, nil
 }
 
-// GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели);
-// Выводит список событий за 7 дней, начиная с дня начала
+// GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели).
+// Выводит список событий за 7 дней, начиная с дня начала.
 func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 
@@ -132,8 +130,8 @@ func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB
 	return events, nil
 }
 
-// GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца)
-// Выводит список событий за 30 дней, начиная с дня начала
+// GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца).
+// Выводит список событий за 30 дней, начиная с дня начала.
 func (r *EventRepo) GetMonthlyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
 	var events []entity.Event
 
@@ -152,7 +150,7 @@ func (r *EventRepo) GetMonthlyEvents(ctx context.Context, eventDB *entity.EventD
 	return events, nil
 }
 
-// isEventTimeBusy проверка на занятость в заданное время
+// isEventTimeBusy проверка на занятость в заданное время.
 func (r *EventRepo) isEventTimeBusy(userEvents map[int32]entity.EventDB, newEvent entity.EventDB) bool {
 	newStartTime := newEvent.EventTime
 	newEndTime := newEvent.EventTime.Add(newEvent.Duration)

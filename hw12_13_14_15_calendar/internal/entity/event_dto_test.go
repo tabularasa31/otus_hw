@@ -15,13 +15,13 @@ func TestCreate(t *testing.T) {
 	}
 
 	t.Run("invalid event data", func(t *testing.T) {
-		userId := int(uuid.New().ID())
+		userID := int(uuid.New().ID())
 		cases := []Case{
 			{
 				name: "invalid title",
 				event: Event{
 					Desc:         "This is event with empty title",
-					UserId:       userId,
+					UserID:       userID,
 					EventTime:    "2006-01-02 15:04:05",
 					Duration:     "1h",
 					Notification: "2h",
@@ -33,7 +33,7 @@ func TestCreate(t *testing.T) {
 				event: Event{
 					Title:        "This is title",
 					Desc:         "This is event with empty event time",
-					UserId:       userId,
+					UserID:       userID,
 					Duration:     "1h",
 					Notification: "2h",
 				},
@@ -44,7 +44,7 @@ func TestCreate(t *testing.T) {
 				event: Event{
 					Title:        "This is title",
 					Desc:         "This is event with empty duration",
-					UserId:       userId,
+					UserID:       userID,
 					EventTime:    "2006-01-02 15:04:05",
 					Notification: "30min",
 				},

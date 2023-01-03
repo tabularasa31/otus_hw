@@ -18,14 +18,14 @@ func TestCreate(t *testing.T) {
 		err   error
 	}
 	t.Run("success event create", func(t *testing.T) {
-		userId := int(uuid.New().ID())
+		userID := int(uuid.New().ID())
 		cases := []Case{
 			{
 				name: "success event create one",
 				event: entity.EventDB{
 					Title:        "event 1",
 					Desc:         "This is event one",
-					UserId:       userId,
+					UserID:       userID,
 					EventTime:    time.Now().Add(time.Hour),
 					Duration:     time.Hour,
 					Notification: time.Hour,
@@ -37,7 +37,7 @@ func TestCreate(t *testing.T) {
 				event: entity.EventDB{
 					Title:        "event 2",
 					Desc:         "This is event two",
-					UserId:       userId,
+					UserID:       userID,
 					EventTime:    time.Now().Add(3 * time.Hour),
 					Duration:     time.Hour,
 					Notification: time.Hour * 2,
@@ -56,12 +56,12 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("event time busy", func(t *testing.T) {
-		userId := int(uuid.New().ID())
+		userID := int(uuid.New().ID())
 		eventRepo := memoryrepo.New()
 		_, err := eventRepo.CreateEvent(context.Background(), &entity.EventDB{
 			Title:        "event one",
 			Desc:         "event one",
-			UserId:       userId,
+			UserID:       userID,
 			EventTime:    time.Date(2022, 12, 30, 15, 0, 0, 0, time.Local),
 			Duration:     time.Hour,
 			Notification: time.Hour * 2,
@@ -71,7 +71,7 @@ func TestCreate(t *testing.T) {
 		_, err = eventRepo.CreateEvent(context.Background(), &entity.EventDB{
 			Title:        "event two",
 			Desc:         "event two",
-			UserId:       userId,
+			UserID:       userID,
 			EventTime:    time.Date(2022, 12, 30, 15, 30, 0, 0, time.Local),
 			Duration:     time.Hour,
 			Notification: time.Hour * 2,
@@ -81,7 +81,7 @@ func TestCreate(t *testing.T) {
 		_, err = eventRepo.CreateEvent(context.Background(), &entity.EventDB{
 			Title:        "event three",
 			Desc:         "event three",
-			UserId:       userId,
+			UserID:       userID,
 			EventTime:    time.Date(2022, 12, 30, 14, 30, 0, 0, time.Local),
 			Duration:     time.Hour,
 			Notification: time.Hour * 2,
