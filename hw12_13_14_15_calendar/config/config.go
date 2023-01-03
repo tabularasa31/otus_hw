@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
@@ -45,10 +46,10 @@ func NewConfig(file string) (*Config, error) {
 		return nil, err
 	}
 
-	//v := validator.New()
-	//if err = v.Struct(cfg); err != nil {
-	//	return nil, fmt.Errorf("failed config: %w", err)
-	//}
+	v := validator.New()
+	if err = v.Struct(cfg); err != nil {
+		return nil, fmt.Errorf("failed config: %w", err)
+	}
 
 	return cfg, nil
 }
