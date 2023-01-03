@@ -1,0 +1,9 @@
+logger:
+  level: INFO
+storage:
+  type: memory
+  dsn: ''
+http:
+  addr: 'localhost:8080'
+grpc:
+  addr: 'localhost:8081'
