@@ -6,6 +6,7 @@ import (
 	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
+	"time"
 )
 
 // EventRepo -.
@@ -102,14 +103,16 @@ func (r *EventRepo) DeleteEvent(ctx context.Context, id int32) error {
 
 // GetDailyEvents СписокСобытийНаДень (дата).
 // Выводит все события, которые начинаются в заданный день.
-func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
+func (r *EventRepo) GetDailyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 
-	query := `SELECT id, title, descr, user_id, event_time, duration, notification
+	query := `SELECT id, title, descr, event_time, duration
        			FROM events 
-       			WHERE DATE_TRUNC('day', event_time) = :date`
+       			WHERE user_id = :uid 
+       			  AND DATE_TRUNC('day', event_time) = :date`
 	args := map[string]interface{}{
-		"date": eventDB.EventTime.Day(),
+		"uid":  userID,
+		"date": date,
 	}
 
 	rows, err := r.Postgres.Pool.Query(ctx, query, args)
@@ -120,8 +123,7 @@ func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB)
 
 	for rows.Next() {
 		var event entity.EventDB
-		if er := rows.Scan(&event.ID, &event.Title, &event.Desc,
-			&event.UserID, &event.EventTime, &event.Duration, &event.Notification); er != nil {
+		if er := rows.Scan(&event.ID, &event.Title, &event.Desc, &event.EventTime, &event.Duration); er != nil {
 			return events, er
 		}
 		events = append(events, *event.Dto())
@@ -132,71 +134,47 @@ func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB)
 
 // GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели).
 // Выводит список событий за 7 дней, начиная с дня начала.
-func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
+func (r *EventRepo) GetWeeklyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
-	query := `SELECT id, title, descr, user_id, event_time, duration, notification
-       			FROM events 
-       			WHERE DATE_TRUNC('week', event_time) 
-       			BETWEEN date :date AND date :date + 7 * interval '1 day'`
-	args := map[string]interface{}{
-		"date": eventDB.EventTime.Day(),
-	}
-	rows, err := r.Postgres.Pool.Query(ctx, query, args)
+
+	startDate := date
+	endDate := startDate.Add(7 * 24 * time.Hour)
+
+	events, err := r.getEventsByDates(ctx, userID, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var event entity.EventDB
-		if e := rows.Scan(&event.ID, &event.Title, &event.Desc,
-			&event.UserID, &event.EventTime, &event.Duration, &event.Notification); e != nil {
-			return events, e
-		}
-		events = append(events, *event.Dto())
-	}
 	return events, nil
 }
 
 // GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца).
 // Выводит список событий за 30 дней, начиная с дня начала.
-func (r *EventRepo) GetMonthlyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
+func (r *EventRepo) GetMonthlyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
-	query := `SELECT id, title, descr, user_id, event_time, duration, notification
-       			FROM events 
-       			WHERE DATE_TRUNC('week', event_time) 
-       			BETWEEN date :date AND date :date + 30 * interval '1 day'`
-	args := map[string]interface{}{
-		"date": eventDB.EventTime.Day(),
-	}
-	rows, err := r.Postgres.Pool.Query(ctx, query, args)
+
+	startDate := date
+	endDate := startDate.Add(30 * 24 * time.Hour)
+
+	events, err := r.getEventsByDates(ctx, userID, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var event entity.EventDB
-		if e := rows.Scan(&event.ID, &event.Title, &event.Desc,
-			&event.UserID, &event.EventTime, &event.Duration, &event.Notification); e != nil {
-			return events, e
-		}
-		events = append(events, *event.Dto())
-	}
 	return events, nil
 }
 
 // isEventTimeBusy проверка на занятость времени.
-func (r *EventRepo) isEventTimeBusy(event entity.EventDB) (bool, error) {
+func (r *EventRepo) isEventTimeBusy(eventDB entity.EventDB) (bool, error) {
 	query := `SELECT id 
 			  FROM events 
 			  WHERE user_id = :userId 
 			    AND event_time BETWEEN :event_time AND :end_time
 			  LIMIT 1`
 	args := map[string]interface{}{
-		"user_id":    event.UserID,
-		"event_time": event.EventTime,
-		"end_time":   event.EventTime.Add(event.Duration),
+		"user_id":    eventDB.UserID,
+		"event_time": eventDB.EventTime,
+		"end_time":   eventDB.EventTime.Add(eventDB.Duration),
 	}
 
 	rows, err := r.Postgres.Pool.Query(context.Background(), query, args)
@@ -209,7 +187,7 @@ func (r *EventRepo) isEventTimeBusy(event entity.EventDB) (bool, error) {
 }
 
 func (r *EventRepo) result(ctx context.Context, id string) (*entity.Event, error) {
-	rows, err := r.Postgres.Pool.Query(ctx, "select id, title, descr, user_id, event_time, duration, notification from events where id = ?", id)
+	rows, err := r.Postgres.Pool.Query(ctx, "select id, title, descr, event_time, duration from events where id = ?", id)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +196,7 @@ func (r *EventRepo) result(ctx context.Context, id string) (*entity.Event, error
 	res := entity.Event{}
 
 	for rows.Next() {
-		er := rows.Scan(&res.ID, &res.Title, &res.Desc, &res.UserID, &res.EventTime, &res.Duration, &res.Notification)
+		er := rows.Scan(&res.ID, &res.Title, &res.Desc, &res.EventTime, &res.Duration)
 		if er != nil {
 			return nil, err
 		}
@@ -228,4 +206,33 @@ func (r *EventRepo) result(ctx context.Context, id string) (*entity.Event, error
 		return nil, err
 	}
 	return &res, nil
+}
+
+func (r *EventRepo) getEventsByDates(ctx context.Context, uid int, startDate time.Time, endDate time.Time) ([]entity.Event, error) {
+	var events []entity.Event
+	query := `SELECT id, title, descr, event_time, duration
+       			FROM events 
+       			WHERE user_id = :uid
+       			AND DATE_TRUNC('day', event_time) 
+       			BETWEEN date :startDate AND date :endDate`
+	args := map[string]interface{}{
+		"uid":       uid,
+		"startDate": startDate,
+		"endDate":   endDate,
+	}
+	rows, err := r.Postgres.Pool.Query(ctx, query, args)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var event entity.EventDB
+		if e := rows.Scan(&event.ID, &event.Title, &event.Desc, &event.EventTime, &event.Duration); e != nil {
+			return events, e
+		}
+		events = append(events, *event.Dto())
+	}
+
+	return events, nil
 }

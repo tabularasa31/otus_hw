@@ -1,8 +1,8 @@
 logger:
   level: INFO
 storage:
-  type: memory
-  dsn: ''
+  type: postgres
+  dsn: 'postgres://postgres:passpass@localhost:5432/calendarDB'
 http:
   addr: 'localhost:8080'
 grpc:

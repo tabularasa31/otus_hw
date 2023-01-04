@@ -8,24 +8,24 @@ import (
 
 type (
 	Event struct {
-		ID           int32  `json:"id" example:"auto"`
-		Title        string `json:"title" binding:"required" example:"title"`
-		Desc         string `json:"desc" binding:"required" example:"description"`
-		UserID       int    `json:"userId" binding:"required" example:"user id"`
-		EventTime    string `json:"eventTime" binding:"required" example:"start event time in RFC3339 format"`
-		Duration     string `json:"duration" binding:"required" example:"event duration in time.Duration format"`
-		Notification string `json:"notification" binding:"required" example:"event notification in time.Duration format"`
+		ID           int32  `json:"id"`
+		Title        string `json:"title"`
+		Desc         string `json:"desc"`
+		UserID       int    `json:"user_id"`
+		EventTime    string `json:"event_time"`
+		Duration     string `json:"duration"`
+		Notification string `json:"notification"`
 	}
 )
 
 func (e *Event) Dao() (*EventDB, error) {
-	if err := e.eventValidate(); err != nil {
-		return nil, fmt.Errorf("error event validation: %w", err)
-	}
+	//if err := e.eventValidate(); err != nil {
+	//	return nil, fmt.Errorf("error event validation: %w", err)
+	//}
 
 	date, err := date_utils.StringToTime(e.EventTime)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("StringToTime: %w", err)
 	}
 
 	d, err := date_utils.StringToDuration(e.Duration)

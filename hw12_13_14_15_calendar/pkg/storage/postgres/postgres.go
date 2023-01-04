@@ -3,14 +3,15 @@ package postgres
 import (
 	"context"
 	"fmt"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"time"
 )
 
 const (
-	_defaultMaxPoolSize  = 1
-	_defaultConnAttempts = 10
+	_defaultMaxPoolSize  = 3
+	_defaultConnAttempts = 5
 	_defaultConnTimeout  = time.Second
 )
 

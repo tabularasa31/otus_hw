@@ -1,20 +1,23 @@
 package date_utils
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 const (
-	_dbLayout  = time.RFC3339
-	_apiLayout = "2006-01-02 15:04:05"
+	// _dbDateLayout  = time.RFC3339
+	_apiDateLayout = "2006-01-02 15:04:05"
 )
 
 func TimeToString(date time.Time) string {
-	return date.Format(_apiLayout)
+	return date.Format(_apiDateLayout)
 }
 
 func StringToTime(s string) (time.Time, error) {
-	date, err := time.Parse(_dbLayout, s)
+	date, err := time.Parse(_apiDateLayout, s)
 	if err != nil {
-		return time.Time{}, err
+		return date, fmt.Errorf("time.Parse(_apiDateLayout, s): %w", err)
 	}
 	return date, nil
 }

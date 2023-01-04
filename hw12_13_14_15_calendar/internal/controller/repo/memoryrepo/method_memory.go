@@ -92,17 +92,15 @@ func (r *EventRepo) DeleteEvent(ctx context.Context, id int32) error {
 
 // GetDailyEvents СписокСобытийНаДень (дата).
 // Выводит все события, которые начинаются в заданный день.
-func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
+func (r *EventRepo) GetDailyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
-
-	day := eventDB.EventTime.Day()
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	for _, userEvents := range r.events {
 		for _, evDB := range userEvents {
-			if evDB.EventTime.Day() == day {
+			if evDB.EventTime.Day() == date.Day() {
 				events = append(events, *evDB.Dto())
 			}
 		}
@@ -112,17 +110,17 @@ func (r *EventRepo) GetDailyEvents(ctx context.Context, eventDB *entity.EventDB)
 
 // GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели).
 // Выводит список событий за 7 дней, начиная с дня начала.
-func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
+func (r *EventRepo) GetWeeklyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 
-	endDay := eventDB.EventTime.Add(7 * 24 * time.Hour)
+	endDay := date.Add(7 * 24 * time.Hour)
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	for _, userEvents := range r.events {
 		for _, evDB := range userEvents {
-			if evDB.EventTime.After(eventDB.EventTime) && evDB.EventTime.Before(endDay) {
+			if evDB.EventTime.After(date) && evDB.EventTime.Before(endDay) {
 				events = append(events, *evDB.Dto())
 			}
 		}
@@ -132,17 +130,17 @@ func (r *EventRepo) GetWeeklyEvents(ctx context.Context, eventDB *entity.EventDB
 
 // GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца).
 // Выводит список событий за 30 дней, начиная с дня начала.
-func (r *EventRepo) GetMonthlyEvents(ctx context.Context, eventDB *entity.EventDB) ([]entity.Event, error) {
+func (r *EventRepo) GetMonthlyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 
-	endDay := eventDB.EventTime.Add(7 * 24 * 30 * time.Hour)
+	endDay := date.Add(7 * 24 * 30 * time.Hour)
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	for _, userEvents := range r.events {
 		for _, evDB := range userEvents {
-			if evDB.EventTime.After(eventDB.EventTime) && evDB.EventTime.Before(endDay) {
+			if evDB.EventTime.After(date) && evDB.EventTime.Before(endDay) {
 				events = append(events, *evDB.Dto())
 			}
 		}
