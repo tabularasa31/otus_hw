@@ -8,29 +8,30 @@ import (
 
 type (
 	EventDB struct {
-		ID           int32
+		ID           int
 		Title        string
 		Desc         string
 		UserID       int
-		EventTime    time.Time
-		Duration     time.Duration
-		Notification time.Duration
+		StartTime    time.Time
+		EndTime      time.Time
+		Notification time.Time
 	}
 )
 
 func (e *EventDB) Dto() *Event {
-	date := date_utils.TimeToString(e.EventTime)
+	date := date_utils.TimeToString(e.StartTime)
 
-	d := date_utils.DurationToString(e.Duration)
+	d := date_utils.TimeToString(e.EndTime)
 
-	n := date_utils.DurationToString(e.Notification)
+	n := date_utils.TimeToString(e.Notification)
 
 	event := Event{
+		ID:           e.ID,
 		Title:        e.Title,
 		Desc:         e.Desc,
 		UserID:       e.UserID,
-		EventTime:    date,
-		Duration:     d,
+		StartTime:    date,
+		EndTime:      d,
 		Notification: n,
 	}
 

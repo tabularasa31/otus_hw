@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"fmt"
+	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/date_utils"
 	"net/http"
 	"strconv"
@@ -39,6 +39,7 @@ func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l logge
 // @Produce     json
 // @Success     201 {object} entity.Event
 // @Failure     400 {object} response
+// @Failure     422 {object} response
 // @Failure     500 {object} response
 // @Router      /event/create [post]
 func (r *calendarRoutes) create(c *gin.Context) {
@@ -56,15 +57,19 @@ func (r *calendarRoutes) create(c *gin.Context) {
 			Title:        req.Title,
 			Desc:         req.Desc,
 			UserID:       req.UserID,
-			EventTime:    req.EventTime,
-			Duration:     req.Duration,
+			StartTime:    req.StartTime,
+			EndTime:      req.EndTime,
 			Notification: req.Notification,
 		},
 	)
 	if err != nil {
-		r.l.Error(err, "http - v1 - create")
-		errorResponse(c, http.StatusInternalServerError, "event creating problems")
-
+		if err == errapp.ErrEventTimeBusy {
+			r.l.Error("http - v1 - create - ErrEventTimeBusy")
+			errorResponse(c, http.StatusUnprocessableEntity, "this event time is already busy")
+		} else {
+			r.l.Error(err, "http - v1 - create")
+			errorResponse(c, http.StatusInternalServerError, "event creating problems")
+		}
 		return
 	}
 
@@ -79,6 +84,7 @@ func (r *calendarRoutes) create(c *gin.Context) {
 // @Produce     json
 // @Success     200 {object} entity.Event
 // @Failure     400 {object} response
+// @Failure     422 {object} response
 // @Failure     500 {object} response
 // @Router      /event/update [post]
 func (r *calendarRoutes) update(c *gin.Context) {
@@ -89,21 +95,27 @@ func (r *calendarRoutes) update(c *gin.Context) {
 
 		return
 	}
+
 	result, err := r.u.Update(
 		c.Request.Context(),
 		entity.Event{
+			ID:           req.ID,
 			Title:        req.Title,
 			Desc:         req.Desc,
 			UserID:       req.UserID,
-			EventTime:    req.EventTime,
-			Duration:     req.Duration,
+			StartTime:    req.StartTime,
+			EndTime:      req.EndTime,
 			Notification: req.Notification,
 		},
 	)
 	if err != nil {
-		r.l.Error(err, "http - v1 - update")
-		errorResponse(c, http.StatusInternalServerError, "event updating problems")
-
+		if err == errapp.ErrEventTimeBusy {
+			r.l.Error("http - v1 - update - ErrEventTimeBusy")
+			errorResponse(c, http.StatusUnprocessableEntity, "this event time is already busy")
+		} else {
+			r.l.Error(err, "http - v1 - update")
+			errorResponse(c, http.StatusInternalServerError, "event updating problems")
+		}
 		return
 	}
 
@@ -169,13 +181,14 @@ func (r *calendarRoutes) daily(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, "event date missed")
 	}
 
-	eventDate, err := date_utils.StringToTime(date)
+	eventDate, err := date_utils.StringToDay(date)
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, "bad event date")
+	}
 
 	r.l.Info("http - v1 - daily - Get Params - uid", uid)
 	r.l.Info("http - v1 - daily - Get Params - date", eventDate)
 	r.l.Info("http - v1 - daily - Get Params - day", eventDate.Day())
-
-	fmt.Println(uid, date)
 
 	result, err := r.u.DailyEvents(c.Request.Context(), userID, eventDate)
 	if err != nil {
@@ -215,11 +228,9 @@ func (r *calendarRoutes) weekly(c *gin.Context) {
 	}
 
 	eventDate, err := date_utils.StringToTime(date)
-
-	r.l.Info("http - v1 - weekly - Get Params - uid", uid)
-	r.l.Info("http - v1 - weekly - Get Params - date", date)
-
-	fmt.Println(uid, date)
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, "bad event date")
+	}
 
 	result, err := r.u.WeeklyEvents(c.Request.Context(), userID, eventDate)
 	if err != nil {
@@ -259,11 +270,9 @@ func (r *calendarRoutes) monthly(c *gin.Context) {
 	}
 
 	eventDate, err := date_utils.StringToTime(date)
-
-	r.l.Info("http - v1 - monthly - Get Params - uid", uid)
-	r.l.Info("http - v1 - monthly - Get Params - date", date)
-
-	fmt.Println(uid, date)
+	if err != nil {
+		errorResponse(c, http.StatusBadRequest, "bad event date")
+	}
 
 	result, err := r.u.MonthlyEvents(c.Request.Context(), userID, eventDate)
 	if err != nil {

@@ -3,14 +3,16 @@ package postgres
 import (
 	"context"
 	"fmt"
-
+	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	"log"
+	"os"
 	"time"
 )
 
 const (
-	_defaultMaxPoolSize  = 3
+	_defaultMaxPoolSize  = 1
 	_defaultConnAttempts = 5
 	_defaultConnTimeout  = time.Second
 )
@@ -20,17 +22,20 @@ type Postgres struct {
 	maxPoolSize  int
 	connAttempts int
 	connTimeout  time.Duration
+	Builder      squirrel.StatementBuilderType
 	Pool         *pgxpool.Pool
 }
 
-func New(url string) (*Postgres, error) {
+func New(cfg *config.Config) (*Postgres, error) {
 	pg := &Postgres{
 		maxPoolSize:  _defaultMaxPoolSize,
 		connAttempts: _defaultConnAttempts,
 		connTimeout:  _defaultConnTimeout,
 	}
 
-	poolConfig, err := pgxpool.ParseConfig(url)
+	pg.Builder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+
+	poolConfig, err := pgxpool.ParseConfig(cfg.Postgres.Dsn)
 	if err != nil {
 		return nil, fmt.Errorf("postgres - NewPostgres - pgxpool.ParseConfig: %w", err)
 	}
@@ -53,6 +58,15 @@ func New(url string) (*Postgres, error) {
 	if err != nil {
 		return nil, fmt.Errorf("postgres - NewPostgres - connAttempts == 0: %w", err)
 	}
+
+	var greeting string
+	err = pg.Pool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Println(greeting)
 
 	return pg, nil
 }

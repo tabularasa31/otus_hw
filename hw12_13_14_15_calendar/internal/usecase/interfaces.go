@@ -11,7 +11,7 @@ type (
 	EventRepo interface {
 		CreateEvent(context.Context, *entity.EventDB) (*entity.Event, error)
 		UpdateEvent(context.Context, *entity.EventDB) (*entity.Event, error)
-		DeleteEvent(context.Context, int32) error
+		DeleteEvent(context.Context, int) error
 		GetDailyEvents(context.Context, int, time.Time) ([]entity.Event, error)
 		GetWeeklyEvents(context.Context, int, time.Time) ([]entity.Event, error)
 		GetMonthlyEvents(context.Context, int, time.Time) ([]entity.Event, error)

@@ -7,10 +7,11 @@ import (
 
 type (
 	Config struct {
-		Logger  `yaml:"logger"`
-		Storage `yaml:"storage" validate:"required"`
-		HTTP    `yaml:"http" validate:"required"`
-		GRPC    `yaml:"grpc" validate:"required"`
+		Logger   `yaml:"logger"`
+		Storage  `yaml:"storage" validate:"required"`
+		HTTP     `yaml:"http" validate:"required"`
+		GRPC     `yaml:"grpc" validate:"required"`
+		Postgres `yaml:"postgres"`
 	}
 
 	Logger struct {
@@ -19,7 +20,6 @@ type (
 
 	Storage struct {
 		Type string `yaml:"type" validate:"required"`
-		Dsn  string `yaml:"dsn"`
 	}
 
 	HTTP struct {
@@ -28,6 +28,11 @@ type (
 
 	GRPC struct {
 		Addr string `yaml:"addr" validate:"required,hostname_port" env:"GRPC_ADDR"`
+	}
+
+	Postgres struct {
+		Dsn     string `yaml:"dsn"`
+		PoolMax int    `yaml:"pool_max" env:"PG_POOL_MAX"`
 	}
 )
 

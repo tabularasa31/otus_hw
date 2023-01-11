@@ -26,9 +26,9 @@ func TestCreate(t *testing.T) {
 					Title:        "event 1",
 					Desc:         "This is event one",
 					UserID:       userID,
-					EventTime:    time.Now().Add(time.Hour),
-					Duration:     time.Hour,
-					Notification: time.Hour,
+					StartTime:    time.Now().Add(time.Hour),
+					EndTime:      time.Now().Add(2 * time.Hour),
+					Notification: time.Now(),
 				},
 				err: nil,
 			},
@@ -38,9 +38,9 @@ func TestCreate(t *testing.T) {
 					Title:        "event 2",
 					Desc:         "This is event two",
 					UserID:       userID,
-					EventTime:    time.Now().Add(3 * time.Hour),
-					Duration:     time.Hour,
-					Notification: time.Hour * 2,
+					StartTime:    time.Now().Add(3 * time.Hour),
+					EndTime:      time.Now().Add(4 * time.Hour),
+					Notification: time.Now(),
 				},
 				err: nil,
 			},
@@ -62,9 +62,9 @@ func TestCreate(t *testing.T) {
 			Title:        "event one",
 			Desc:         "event one",
 			UserID:       userID,
-			EventTime:    time.Date(2022, 12, 30, 15, 0, 0, 0, time.Local),
-			Duration:     time.Hour,
-			Notification: time.Hour * 2,
+			StartTime:    time.Date(2022, 12, 30, 15, 0, 0, 0, time.Local),
+			EndTime:      time.Date(2022, 12, 30, 16, 30, 0, 0, time.Local),
+			Notification: time.Now(),
 		})
 		require.NoError(t, err)
 
@@ -72,9 +72,9 @@ func TestCreate(t *testing.T) {
 			Title:        "event two",
 			Desc:         "event two",
 			UserID:       userID,
-			EventTime:    time.Date(2022, 12, 30, 15, 30, 0, 0, time.Local),
-			Duration:     time.Hour,
-			Notification: time.Hour * 2,
+			StartTime:    time.Date(2022, 12, 30, 15, 30, 0, 0, time.Local),
+			EndTime:      time.Date(2022, 12, 30, 16, 30, 0, 0, time.Local),
+			Notification: time.Now(),
 		})
 		require.ErrorIs(t, err, repo.ErrEventTimeBusy)
 
@@ -82,9 +82,9 @@ func TestCreate(t *testing.T) {
 			Title:        "event three",
 			Desc:         "event three",
 			UserID:       userID,
-			EventTime:    time.Date(2022, 12, 30, 14, 30, 0, 0, time.Local),
-			Duration:     time.Hour,
-			Notification: time.Hour * 2,
+			StartTime:    time.Date(2022, 12, 30, 14, 30, 0, 0, time.Local),
+			EndTime:      time.Date(2022, 12, 30, 15, 30, 0, 0, time.Local),
+			Notification: time.Now(),
 		})
 		require.ErrorIs(t, err, repo.ErrEventTimeBusy)
 	})

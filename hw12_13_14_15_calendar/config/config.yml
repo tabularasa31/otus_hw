@@ -2,8 +2,10 @@ logger:
   level: INFO
 storage:
   type: postgres
-  dsn: 'postgres://postgres:passpass@localhost:5432/calendarDB'
 http:
   addr: 'localhost:8080'
 grpc:
   addr: 'localhost:8081'
+postgres:
+  dsn: 'postgres://postgres:passpass@localhost:5432/calendarDB'
+  pool_max: 2

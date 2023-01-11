@@ -7,29 +7,26 @@ import (
 
 const (
 	// _dbDateLayout  = time.RFC3339
-	_apiDateLayout = "2006-01-02 15:04:05"
+	_apiDayLayout  = "2006-01-02"
+	_apiTimeLayout = "2006-01-02 15:04:05"
 )
 
 func TimeToString(date time.Time) string {
-	return date.Format(_apiDateLayout)
+	return date.Format(_apiTimeLayout)
 }
 
 func StringToTime(s string) (time.Time, error) {
-	date, err := time.Parse(_apiDateLayout, s)
+	date, err := time.Parse(_apiTimeLayout, s)
 	if err != nil {
 		return date, fmt.Errorf("time.Parse(_apiDateLayout, s): %w", err)
 	}
 	return date, nil
 }
 
-func DurationToString(d time.Duration) string {
-	return d.String()
-}
-
-func StringToDuration(s string) (time.Duration, error) {
-	d, err := time.ParseDuration(s)
+func StringToDay(s string) (time.Time, error) {
+	date, err := time.Parse(_apiDayLayout, s)
 	if err != nil {
-		return 0, err
+		return date, fmt.Errorf("time.Parse(_apiDayLayout, s): %w", err)
 	}
-	return d, nil
+	return date, nil
 }

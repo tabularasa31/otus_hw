@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/date_utils"
 	"time"
 )
 
@@ -20,33 +21,72 @@ func New(r EventRepo) *EventUseCase {
 }
 
 func (u *EventUseCase) Create(ctx context.Context, event entity.Event) (*entity.Event, error) {
-	eventDB, err := event.Dao()
+	date, err := date_utils.StringToTime(event.StartTime)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - Create - event.Dao: %w", err)
+		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(StartTime): %w", err)
 	}
 
-	res, err := u.repo.CreateEvent(ctx, eventDB)
+	d, err := date_utils.StringToTime(event.EndTime)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - Create - u.repo.CreateEvent: %w", err)
+		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(EndTime): %w", err)
 	}
 
-	return res, nil
+	n, err := date_utils.StringToTime(event.Notification)
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(Notification): %w", err)
+	}
+
+	eventDB := entity.EventDB{
+		Title:        event.Title,
+		Desc:         event.Desc,
+		UserID:       event.UserID,
+		StartTime:    date,
+		EndTime:      d,
+		Notification: n,
+	}
+
+	result, err := u.repo.CreateEvent(ctx, &eventDB)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (u *EventUseCase) Update(ctx context.Context, event entity.Event) (*entity.Event, error) {
-	eventDB, err := event.Dao()
+	date, err := date_utils.StringToTime(event.StartTime)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - Update - event.Dao: %w", err)
+		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(StartTime): %w", err)
 	}
 
-	res, err := u.repo.UpdateEvent(ctx, eventDB)
+	d, err := date_utils.StringToTime(event.EndTime)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - Update - u.repo.UpdateEvent: %w", err)
+		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(EndTime): %w", err)
+	}
+
+	n, err := date_utils.StringToTime(event.Notification)
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(Notification): %w", err)
+	}
+
+	eventDB := entity.EventDB{
+		ID:           event.ID,
+		Title:        event.Title,
+		Desc:         event.Desc,
+		UserID:       event.UserID,
+		StartTime:    date,
+		EndTime:      d,
+		Notification: n,
+	}
+
+	res, err := u.repo.UpdateEvent(ctx, &eventDB)
+	if err != nil {
+		return nil, err
 	}
 	return res, nil
 }
 
-func (u *EventUseCase) Delete(ctx context.Context, userID int32) error {
+func (u *EventUseCase) Delete(ctx context.Context, userID int) error {
 	err := u.repo.DeleteEvent(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("EventUseCase - DeleteEvent - u.repo.DeleteEvent: %w", err)

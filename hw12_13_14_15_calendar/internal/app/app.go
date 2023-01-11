@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	v1 "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/http/v1"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo/memoryrepo"
@@ -23,10 +24,20 @@ func Run(cfg *config.Config) {
 	logg := logger.New(cfg.Logger.Level)
 
 	// EventRepo
-	r := repo(cfg)
+	var repo usecase.EventRepo
+	if cfg.Storage.Type == "postgres" {
+		pg, err := postgres.New(cfg)
+		if err != nil {
+			log.Fatal(fmt.Errorf("app - Run - repo - postgres.New: %w", err))
+		}
+		defer pg.Close()
+		repo = postgresrepo.New(pg)
+	} else {
+		repo = memoryrepo.New()
+	}
 
 	// Use case
-	eventUseCase := usecase.New(r)
+	eventUseCase := usecase.New(repo)
 
 	// HTTP Server
 	handler := gin.New()
@@ -49,16 +60,4 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		logg.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}
-}
-
-func repo(cfg *config.Config) usecase.EventRepo {
-	if cfg.Storage.Type == "postgres" {
-		pg, err := postgres.New(cfg.Storage.Dsn)
-		if err != nil {
-			log.Fatal(fmt.Errorf("app - Run - repo - postgres.New: %w", err))
-		}
-		defer pg.Close()
-		return postgresrepo.New(pg)
-	}
-	return memoryrepo.New()
 }
