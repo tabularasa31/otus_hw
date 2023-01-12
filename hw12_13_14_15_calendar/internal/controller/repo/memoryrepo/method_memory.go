@@ -92,60 +92,35 @@ func (r *EventRepo) DeleteEvent(ctx context.Context, id int) error {
 
 // GetDailyEvents СписокСобытийНаДень (дата).
 // Выводит все события, которые начинаются в заданный день.
-func (r *EventRepo) GetDailyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
-	var events []entity.Event
+//func (r *EventRepo) GetDailyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
+//	var events []entity.Event
+//
+//	r.mu.RLock()
+//	defer r.mu.RUnlock()
+//
+//	for _, userEvents := range r.events {
+//		for _, evDB := range userEvents {
+//			if evDB.StartTime.Day() == date.Day() {
+//				events = append(events, *evDB.Dto())
+//			}
+//		}
+//	}
+//	return events, nil
+//}
+
+func (r *EventRepo) GetEventsByDates(ctx context.Context, uid int, start time.Time, end time.Time) ([]entity.Event, error) {
+	var userEvents []entity.Event
 
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	for _, userEvents := range r.events {
-		for _, evDB := range userEvents {
-			if evDB.StartTime.Day() == date.Day() {
-				events = append(events, *evDB.Dto())
-			}
+	for _, userEvent := range r.events[uid] {
+		if userEvent.StartTime.After(start) && userEvent.StartTime.Before(end) {
+			userEvents = append(userEvents, *userEvent.Dto())
 		}
 	}
-	return events, nil
-}
 
-// GetWeeklyEvents СписокСобытийНаНеделю (дата начала недели).
-// Выводит список событий за 7 дней, начиная с дня начала.
-func (r *EventRepo) GetWeeklyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
-	var events []entity.Event
-
-	endDay := date.Add(7 * 24 * time.Hour)
-
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	for _, userEvents := range r.events {
-		for _, evDB := range userEvents {
-			if evDB.StartTime.After(date) && evDB.StartTime.Before(endDay) {
-				events = append(events, *evDB.Dto())
-			}
-		}
-	}
-	return events, nil
-}
-
-// GetMonthlyEvents СписокСобытийНaМесяц (дата начала месяца).
-// Выводит список событий за 30 дней, начиная с дня начала.
-func (r *EventRepo) GetMonthlyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
-	var events []entity.Event
-
-	endDay := date.Add(7 * 24 * 30 * time.Hour)
-
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	for _, userEvents := range r.events {
-		for _, evDB := range userEvents {
-			if evDB.StartTime.After(date) && evDB.StartTime.Before(endDay) {
-				events = append(events, *evDB.Dto())
-			}
-		}
-	}
-	return events, nil
+	return userEvents, nil
 }
 
 // isEventTimeBusy проверка на занятость в заданное время.

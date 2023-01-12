@@ -1,7 +1,7 @@
 logger:
   level: INFO
 storage:
-  type: postgres
+  type: memory
 http:
   addr: 'localhost:8080'
 grpc:

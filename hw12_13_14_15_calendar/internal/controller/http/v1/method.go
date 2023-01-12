@@ -5,6 +5,7 @@ import (
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/date_utils"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
@@ -24,7 +25,7 @@ func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l logge
 	{
 		h.POST("/create", r.create)
 		h.POST("/update", r.update)
-		h.POST("/delete", r.delete)
+		h.DELETE("/delete/:id", r.delete)
 		h.GET("/daily", r.daily)
 		h.GET("/weekly", r.weekly)
 		h.GET("/monthly", r.monthly)
@@ -126,21 +127,20 @@ func (r *calendarRoutes) update(c *gin.Context) {
 // @Description Delete event by event_id
 // @ID          delete
 // @Tags  	    event
-// @Accept      json
+// @Accept      int
 // @Produce     plain
 // @Success     200 {string} string "Deleted Success"
 // @Failure     400 {object} response
 // @Failure     500 {object} response
-// @Router      /event/delete [post]
+// @Router      /event/delete [delete]
 func (r *calendarRoutes) delete(c *gin.Context) {
-	var req entity.Event
-	if err := c.ShouldBindJSON(&req); err != nil {
-		r.l.Error(err, "http - v1 - delete")
-		errorResponse(c, http.StatusBadRequest, "invalid request body")
-
-		return
+	param := c.Param("id")
+	id, e := strconv.Atoi(param)
+	if e != nil {
+		errorResponse(c, http.StatusBadRequest, "param ID not int")
 	}
-	err := r.u.Delete(c.Request.Context(), req.ID)
+
+	err := r.u.Delete(c.Request.Context(), id)
 	if err != nil {
 		r.l.Error(err, "http - v1 - delete")
 		errorResponse(c, http.StatusInternalServerError, "event deleting problems")
@@ -181,23 +181,14 @@ func (r *calendarRoutes) daily(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, "event date missed")
 	}
 
-	eventDate, err := date_utils.StringToDay(date)
+	start, err := date_utils.StringToDay(date)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, "bad event date")
 	}
 
-	r.l.Info("http - v1 - daily - Get Params - uid", uid)
-	r.l.Info("http - v1 - daily - Get Params - date", eventDate)
-	r.l.Info("http - v1 - daily - Get Params - day", eventDate.Day())
+	end := start.Add(24 * time.Hour)
 
-	result, err := r.u.DailyEvents(c.Request.Context(), userID, eventDate)
-	if err != nil {
-		r.l.Error(err, "http - v1 - daily")
-		errorResponse(c, http.StatusInternalServerError, "getting events problems")
-
-		return
-	}
-
+	result, err := r.u.EventsByDates(c.Request.Context(), userID, start, end)
 	c.JSON(http.StatusOK, eventsResponse{result})
 }
 
@@ -227,19 +218,14 @@ func (r *calendarRoutes) weekly(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, "event date missed")
 	}
 
-	eventDate, err := date_utils.StringToTime(date)
+	start, err := date_utils.StringToDay(date)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, "bad event date")
 	}
 
-	result, err := r.u.WeeklyEvents(c.Request.Context(), userID, eventDate)
-	if err != nil {
-		r.l.Error(err, "http - v1 - weekly")
-		errorResponse(c, http.StatusInternalServerError, "getting events problems")
+	end := start.Add(7 * 24 * time.Hour)
 
-		return
-	}
-
+	result, err := r.u.EventsByDates(c.Request.Context(), userID, start, end)
 	c.JSON(http.StatusOK, eventsResponse{result})
 }
 
@@ -269,18 +255,13 @@ func (r *calendarRoutes) monthly(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, "event date missed")
 	}
 
-	eventDate, err := date_utils.StringToTime(date)
+	start, err := date_utils.StringToDay(date)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, "bad event date")
 	}
 
-	result, err := r.u.MonthlyEvents(c.Request.Context(), userID, eventDate)
-	if err != nil {
-		r.l.Error(err, "http - v1 - monthly")
-		errorResponse(c, http.StatusInternalServerError, "getting events problems")
+	end := start.Add(30 * 24 * time.Hour)
 
-		return
-	}
-
+	result, err := r.u.EventsByDates(c.Request.Context(), userID, start, end)
 	c.JSON(http.StatusOK, eventsResponse{result})
 }

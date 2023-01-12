@@ -94,26 +94,10 @@ func (u *EventUseCase) Delete(ctx context.Context, userID int) error {
 	return nil
 }
 
-func (u *EventUseCase) DailyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
-	events, err := u.repo.GetDailyEvents(ctx, userID, date)
+func (u *EventUseCase) EventsByDates(ctx context.Context, userID int, start time.Time, end time.Time) ([]entity.Event, error) {
+	events, err := u.repo.GetEventsByDates(ctx, userID, start, end)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - DailyEvents - u.repo.GetDailyEvents: %w", err)
-	}
-	return events, nil
-}
-
-func (u *EventUseCase) WeeklyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
-	events, err := u.repo.GetWeeklyEvents(ctx, userID, date)
-	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - WeeklyEvents - u.repo.GetWeeklyEvents: %w", err)
-	}
-	return events, nil
-}
-
-func (u *EventUseCase) MonthlyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
-	events, err := u.repo.GetMonthlyEvents(ctx, userID, date)
-	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - MonthlyEvents - u.repo.MonthlyEvents: %w", err)
+		return nil, fmt.Errorf("EventUseCase - EventsByDates - u.repo.GetEventsByDates: %w", err)
 	}
 	return events, nil
 }
