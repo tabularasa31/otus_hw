@@ -3,7 +3,7 @@ package entity
 import (
 	"time"
 
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/date_utils"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/utils"
 )
 
 type (
@@ -19,11 +19,11 @@ type (
 )
 
 func (e *EventDB) Dto() *Event {
-	date := date_utils.TimeToString(e.StartTime)
+	date := utils.TimeToString(e.StartTime)
 
-	d := date_utils.TimeToString(e.EndTime)
+	d := utils.TimeToString(e.EndTime)
 
-	n := date_utils.TimeToString(e.Notification)
+	n := utils.TimeToString(e.Notification)
 
 	event := Event{
 		ID:           e.ID,

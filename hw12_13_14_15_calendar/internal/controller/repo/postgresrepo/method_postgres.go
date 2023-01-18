@@ -3,10 +3,11 @@ package postgresrepo
 import (
 	"context"
 	"fmt"
+	"time"
+
 	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
-	"time"
 )
 
 // EventRepo -.
@@ -110,7 +111,6 @@ func (r *EventRepo) GetEventsByDates(ctx context.Context, uid int, startDate tim
 	}
 
 	rows, err := r.Postgres.Pool.Query(ctx, sql, args...)
-
 	if err != nil {
 		return nil, fmt.Errorf("postgres - GetEventsByDates - r.Postgres.Pool.Query: %w", err)
 	}
@@ -120,9 +120,9 @@ func (r *EventRepo) GetEventsByDates(ctx context.Context, uid int, startDate tim
 		var eventDB entity.EventDB
 		if er := rows.Scan(&eventDB.ID, &eventDB.Title, &eventDB.Desc, &eventDB.UserID, &eventDB.StartTime, &eventDB.EndTime, &eventDB.Notification); er != nil {
 			return events, fmt.Errorf("postgres - GetDailyEvents - rows.Scan: %w", er)
-		} else {
-			events = append(events, *eventDB.Dto())
 		}
+		events = append(events, *eventDB.Dto())
+
 	}
 	return events, nil
 }

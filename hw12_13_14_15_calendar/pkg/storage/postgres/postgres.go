@@ -3,11 +3,12 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
-	"log"
-	"time"
 )
 
 const (

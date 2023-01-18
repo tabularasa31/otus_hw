@@ -1,6 +1,9 @@
 package grpcserver
 
 import (
+	"net"
+	"time"
+
 	proto "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/api"
 	grpcv1 "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/grpc/v1"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
@@ -8,8 +11,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/reflection"
-	"net"
-	"time"
 )
 
 const (

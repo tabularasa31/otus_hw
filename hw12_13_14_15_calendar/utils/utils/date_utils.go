@@ -1,4 +1,4 @@
-package date_utils
+package utils
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 )
 
 const (
-	// _dbDateLayout  = time.RFC3339
 	_apiDayLayout  = "2006-01-02"
 	_apiTimeLayout = "2006-01-02 15:04:05"
 )

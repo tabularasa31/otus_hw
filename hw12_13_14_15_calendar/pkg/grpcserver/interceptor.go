@@ -2,24 +2,25 @@ package grpcserver
 
 import (
 	"context"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 	"time"
+
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
 
-// InterceptorManager
+// InterceptorManager .
 type InterceptorManager struct {
 	logger logger.Logger
 }
 
-// InterceptorManager constructor
+// NewInterceptorManager - InterceptorManager constructor .
 func NewInterceptorManager(logger logger.Logger) *InterceptorManager {
 	return &InterceptorManager{logger: logger}
 }
 
-// Logger Interceptor
+// Logger Interceptor .
 func (im *InterceptorManager) Logger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
 	start := time.Now()
 	md, _ := metadata.FromIncomingContext(ctx)

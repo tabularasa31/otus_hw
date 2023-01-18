@@ -2,15 +2,16 @@ package grpcv1
 
 import (
 	"context"
+	"time"
+
 	proto "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/api"
 	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/date_utils"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"time"
 )
 
 type CalendarGRPCService struct {
@@ -39,10 +40,10 @@ func (g *CalendarGRPCService) CreateEvent(ctx context.Context, req *proto.Event)
 		if err == errapp.ErrEventTimeBusy {
 			g.l.Error("grpc - v1 - create - ErrEventTimeBusy")
 			return nil, status.Errorf(codes.InvalidArgument, "this event time is already busy")
-		} else {
-			g.l.Error(err, "grpc - v1 - create")
-			return nil, status.Errorf(codes.Internal, "event creating problems")
 		}
+		g.l.Error(err, "grpc - v1 - create")
+		return nil, status.Errorf(codes.Internal, "event creating problems")
+
 	}
 
 	return &proto.Event{
@@ -73,10 +74,10 @@ func (g *CalendarGRPCService) UpdateEvent(ctx context.Context, req *proto.Event)
 		if err == errapp.ErrEventTimeBusy {
 			g.l.Error("grpc - v1 - update - ErrEventTimeBusy")
 			return nil, status.Errorf(codes.InvalidArgument, "this event time is already busy")
-		} else {
-			g.l.Error(err, "grpc - v1 - update")
-			return nil, status.Errorf(codes.Internal, "event updating problems")
 		}
+		g.l.Error(err, "grpc - v1 - update")
+		return nil, status.Errorf(codes.Internal, "event updating problems")
+
 	}
 
 	return &proto.Event{
@@ -101,7 +102,7 @@ func (g *CalendarGRPCService) DeleteEvent(ctx context.Context, uid *proto.UID) (
 
 func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := date_utils.StringToDay(in.GetStart())
+	start, err := utils.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -114,7 +115,7 @@ func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context, in *proto.GetE
 		return nil, status.Errorf(codes.Internal, "getting daily events by date problems")
 	}
 
-	var events []*proto.Event
+	events := make([]*proto.Event, 0, len(result))
 	for _, event := range result {
 		events = append(events, &proto.Event{
 			Id:           int64(event.ID),
@@ -128,9 +129,10 @@ func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context, in *proto.GetE
 
 	return &proto.GetEventsResponse{Events: events}, nil
 }
+
 func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := date_utils.StringToDay(in.GetStart())
+	start, err := utils.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -143,7 +145,7 @@ func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context, in *proto.Get
 		return nil, status.Errorf(codes.Internal, "getting weekly events by date problems")
 	}
 
-	var events []*proto.Event
+	events := make([]*proto.Event, 0, len(result))
 	for _, event := range result {
 		events = append(events, &proto.Event{
 			Id:           int64(event.ID),
@@ -160,7 +162,7 @@ func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context, in *proto.Get
 
 func (g *CalendarGRPCService) GetMonthlyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := date_utils.StringToDay(in.GetStart())
+	start, err := utils.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -173,7 +175,7 @@ func (g *CalendarGRPCService) GetMonthlyEvents(ctx context.Context, in *proto.Ge
 		return nil, status.Errorf(codes.Internal, "getting monthly events by date problems")
 	}
 
-	var events []*proto.Event
+	events := make([]*proto.Event, 0, len(result))
 	for _, event := range result {
 		events = append(events, &proto.Event{
 			Id:           int64(event.ID),

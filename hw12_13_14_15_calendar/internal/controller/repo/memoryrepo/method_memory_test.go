@@ -2,13 +2,14 @@ package memoryrepo_test
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo/memoryrepo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
-	"testing"
-	"time"
 )
 
 func TestCreate(t *testing.T) {

@@ -2,11 +2,12 @@ package memoryrepo
 
 import (
 	"context"
+	"sync"
+	"time"
+
 	"github.com/google/uuid"
 	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
-	"sync"
-	"time"
 )
 
 // EventRepo -.

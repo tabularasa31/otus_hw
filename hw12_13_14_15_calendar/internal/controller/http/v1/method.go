@@ -1,11 +1,12 @@
 package v1
 
 import (
-	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/date_utils"
 	"net/http"
 	"strconv"
 	"time"
+
+	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
@@ -181,7 +182,7 @@ func (r *calendarRoutes) daily(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, "event date missed")
 	}
 
-	start, err := date_utils.StringToDay(date)
+	start, err := utils.StringToDay(date)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, "bad event date")
 	}
@@ -223,7 +224,7 @@ func (r *calendarRoutes) weekly(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, "event date missed")
 	}
 
-	start, err := date_utils.StringToDay(date)
+	start, err := utils.StringToDay(date)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, "bad event date")
 	}
@@ -265,7 +266,7 @@ func (r *calendarRoutes) monthly(c *gin.Context) {
 		errorResponse(c, http.StatusBadRequest, "event date missed")
 	}
 
-	start, err := date_utils.StringToDay(date)
+	start, err := utils.StringToDay(date)
 	if err != nil {
 		errorResponse(c, http.StatusBadRequest, "bad event date")
 	}

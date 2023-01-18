@@ -2,8 +2,13 @@ package app
 
 import (
 	"fmt"
+	"log"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/gin-gonic/gin"
-	_ "github.com/lib/pq"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	v1 "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/http/v1"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo/memoryrepo"
@@ -13,11 +18,6 @@ import (
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/httpserver"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
-	"log"
-	"net"
-	"os"
-	"os/signal"
-	"syscall"
 )
 
 // Run creates objects via constructors.
@@ -49,11 +49,11 @@ func Run(cfg *config.Config) {
 	// GRPC Server
 	lis, err := net.Listen("tcp", cfg.GRPC.Addr)
 	if err != nil {
-		log.Fatal(fmt.Errorf("app - Run - net.Listen: %w", err))
+		logg.Fatal(fmt.Errorf("app - Run - net.Listen: %w", err))
 	}
 	defer func() {
 		if e := lis.Close(); e != nil {
-			log.Fatalf("...failed to close client, error: %v\n", e)
+			logg.Fatal("...failed to close client, error: %v\n", e)
 		}
 	}()
 
