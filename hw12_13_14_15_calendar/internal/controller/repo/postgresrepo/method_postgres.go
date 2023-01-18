@@ -30,7 +30,7 @@ func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 		return nil, fmt.Errorf("postgres - CreateEvent - r.isEventTimeBusy: %w", er)
 	}
 
-	sql, args, err := r.Builder.
+	sql, args, err := r.Postgres.Builder.
 		Insert("events").
 		Columns("user_id, title, descr, start_time, end_time, notification").
 		Values(eventDB.UserID, eventDB.Title, eventDB.Desc, eventDB.StartTime, eventDB.EndTime, eventDB.Notification).
@@ -64,7 +64,7 @@ func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 		return nil, fmt.Errorf("postgres - UpdateEvent - r.isEventTimeBusy: %w", er)
 	}
 
-	sql, args, err := r.Builder.
+	sql, args, err := r.Postgres.Builder.
 		Update("events").
 		Set("user_id", eventDB.UserID).
 		Set("title", eventDB.Title).
@@ -101,7 +101,7 @@ func (r *EventRepo) DeleteEvent(ctx context.Context, id int) error {
 func (r *EventRepo) GetEventsByDates(ctx context.Context, uid int, startDate time.Time, endDate time.Time) ([]entity.Event, error) {
 	var events []entity.Event
 
-	sql, args, err := r.Builder.Select("id, title, descr, user_id, start_time, end_time, notification").
+	sql, args, err := r.Postgres.Builder.Select("id, title, descr, user_id, start_time, end_time, notification").
 		From("events").
 		Where("user_id=?", uid).
 		Where("DATE_TRUNC('day', start_time) BETWEEN ? AND ?", startDate.Format("2006-01-02"), endDate.Format("2006-01-02")).
