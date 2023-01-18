@@ -11,6 +11,9 @@ swag-v1: ### swag init
 	swag init --parseDependency --parseInternal -g internal/controller/http/v1/router.go
 .PHONY: swag-v1
 
+generate:
+	 go generate ./...
+
 build:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
 .PHONY: build
@@ -37,8 +40,7 @@ version: build
 .PHONY: version
 
 test:
-	go test -race ./internal/...
-.PHONY: test
+	go test -cover -race ./internal/...
 
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1

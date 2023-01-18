@@ -26,7 +26,7 @@ func New() *EventRepo {
 }
 
 // CreateEvent Создать (событие).
-func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
+func (r *EventRepo) CreateEvent(_ context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -47,8 +47,8 @@ func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 	return res.Dto(), nil
 }
 
-// UpdateEvent Обновить (ID пользователя, ID события, событие).
-func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
+// UpdateEvent Обновить (событие).
+func (r *EventRepo) UpdateEvent(_ context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -77,7 +77,7 @@ func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 }
 
 // DeleteEvent Удалить (ID события).
-func (r *EventRepo) DeleteEvent(ctx context.Context, id int) error {
+func (r *EventRepo) DeleteEvent(_ context.Context, id int) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -90,25 +90,9 @@ func (r *EventRepo) DeleteEvent(ctx context.Context, id int) error {
 	return errapp.ErrEventNotFound
 }
 
-// GetDailyEvents СписокСобытийНаДень (дата).
-// Выводит все события, которые начинаются в заданный день.
-//func (r *EventRepo) GetDailyEvents(ctx context.Context, userID int, date time.Time) ([]entity.Event, error) {
-//	var events []entity.Event
-//
-//	r.mu.RLock()
-//	defer r.mu.RUnlock()
-//
-//	for _, userEvents := range r.events {
-//		for _, evDB := range userEvents {
-//			if evDB.StartTime.Day() == date.Day() {
-//				events = append(events, *evDB.Dto())
-//			}
-//		}
-//	}
-//	return events, nil
-//}
-
-func (r *EventRepo) GetEventsByDates(ctx context.Context, uid int, start time.Time, end time.Time) ([]entity.Event, error) {
+// GetEventsByDates СписокСобытийЗаПериод (дата).
+// Выводит все события за период, которые начинаются в заданный день.
+func (r *EventRepo) GetEventsByDates(_ context.Context, uid int, start time.Time, end time.Time) ([]entity.Event, error) {
 	var userEvents []entity.Event
 
 	r.mu.RLock()

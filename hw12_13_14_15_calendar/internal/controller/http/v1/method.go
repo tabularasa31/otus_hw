@@ -189,6 +189,11 @@ func (r *calendarRoutes) daily(c *gin.Context) {
 	end := start.Add(24 * time.Hour)
 
 	result, err := r.u.EventsByDates(c.Request.Context(), userID, start, end)
+	if err != nil {
+		r.l.Error("http - v1 - daily - EventsByDates: %w", err)
+		errorResponse(c, http.StatusInternalServerError, "getting daily events by date problems")
+	}
+
 	c.JSON(http.StatusOK, eventsResponse{result})
 }
 
@@ -226,6 +231,11 @@ func (r *calendarRoutes) weekly(c *gin.Context) {
 	end := start.Add(7 * 24 * time.Hour)
 
 	result, err := r.u.EventsByDates(c.Request.Context(), userID, start, end)
+	if err != nil {
+		r.l.Error("http - v1 - weekly - EventsByDates: %w", err)
+		errorResponse(c, http.StatusInternalServerError, "getting weekly events by date problems")
+	}
+
 	c.JSON(http.StatusOK, eventsResponse{result})
 }
 
@@ -263,5 +273,10 @@ func (r *calendarRoutes) monthly(c *gin.Context) {
 	end := start.Add(30 * 24 * time.Hour)
 
 	result, err := r.u.EventsByDates(c.Request.Context(), userID, start, end)
+	if err != nil {
+		r.l.Error("http - v1 - monthly - EventsByDates: %w", err)
+		errorResponse(c, http.StatusInternalServerError, "getting monthly events by date problems")
+	}
+
 	c.JSON(http.StatusOK, eventsResponse{result})
 }

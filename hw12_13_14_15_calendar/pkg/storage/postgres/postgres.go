@@ -7,7 +7,6 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	"log"
-	"os"
 	"time"
 )
 
@@ -58,15 +57,6 @@ func New(cfg *config.Config) (*Postgres, error) {
 	if err != nil {
 		return nil, fmt.Errorf("postgres - NewPostgres - connAttempts == 0: %w", err)
 	}
-
-	var greeting string
-	err = pg.Pool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		os.Exit(1)
-	}
-
-	fmt.Println(greeting)
 
 	return pg, nil
 }

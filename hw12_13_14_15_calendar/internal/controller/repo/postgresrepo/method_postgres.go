@@ -65,6 +65,7 @@ func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 
 	sql, args, err := r.Builder.
 		Update("events").
+		Set("user_id", eventDB.UserID).
 		Set("title", eventDB.Title).
 		Set("descr", eventDB.Desc).
 		Set("start_time", eventDB.StartTime).
@@ -144,9 +145,6 @@ func (r *EventRepo) isEventTimeBusy(eventDB entity.EventDB) (bool, error) {
 }
 
 func (r *EventRepo) result(ctx context.Context, id int) (*entity.Event, error) {
-
-	fmt.Println("--------ID----------  ", id)
-
 	rows, err := r.Postgres.Pool.Query(ctx, "select id, title, descr, user_id, start_time, end_time, notification from events where id = $1", id)
 	if err != nil {
 		return nil, fmt.Errorf("postgres - result - r.Postgres.Pool.Query: %w", err)
@@ -165,8 +163,6 @@ func (r *EventRepo) result(ctx context.Context, id int) (*entity.Event, error) {
 	if err != nil {
 		return nil, fmt.Errorf("postgres - result - rows.Err: %w", err)
 	}
-
-	fmt.Println("RESULT RESULT -----------", res)
 
 	return res.Dto(), nil
 }

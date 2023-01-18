@@ -7,7 +7,6 @@ require (
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/gin-gonic/gin v1.8.2
 	github.com/gofrs/uuid v4.3.1+incompatible // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/ilyakaznacheev/cleanenv v1.4.2
 	github.com/jackc/pgx/v4 v4.17.2
@@ -23,4 +22,6 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90 // indirect
+	google.golang.org/grpc v1.52.0
+	google.golang.org/protobuf v1.28.1
 )
