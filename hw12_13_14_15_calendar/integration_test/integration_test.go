@@ -2,7 +2,7 @@ package integration_test
 
 import (
 	"encoding/json"
-	. "github.com/Eun/go-hit"
+	"github.com/Eun/go-hit"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/utils"
 	"log"
@@ -38,7 +38,7 @@ func healthCheck(attempts int) error {
 	var err error
 
 	for attempts > 0 {
-		err = Do(Get(healthPath), Expect().Status().Equal(http.StatusOK))
+		err = hit.Do(hit.Get(healthPath), hit.Expect().Status().Equal(http.StatusOK))
 		if err == nil {
 			return nil
 		}
@@ -71,16 +71,16 @@ func TestHTTPUpdate(t *testing.T) {
 		log.Fatal("error marshal json: %w", err)
 	}
 
-	Test(t,
-		Description("Update Event Success"),
-		Post(basePath+"/event/update"),
-		Send().Headers("Content-Type").Add("application/json"),
-		Send().Body().Bytes(body),
-		Expect().Status().Equal(http.StatusOK),
-		Expect().Body().JSON().JQ(".id").Equal("7.000000"),
-		Expect().Body().JSON().JQ(".title").Equal("Test title"),
-		Expect().Body().JSON().JQ(".desc").Equal("Test description"),
-		Expect().Body().JSON().JQ(".user_id").Equal("42.000000"),
+	hit.Test(t,
+		hit.Description("Update Event Success"),
+		hit.Post(basePath+"/event/update"),
+		hit.Send().Headers("Content-Type").Add("application/json"),
+		hit.Send().Body().Bytes(body),
+		hit.Expect().Status().Equal(http.StatusOK),
+		hit.Expect().Body().JSON().JQ(".id").Equal("7.000000"),
+		hit.Expect().Body().JSON().JQ(".title").Equal("Test title"),
+		hit.Expect().Body().JSON().JQ(".desc").Equal("Test description"),
+		hit.Expect().Body().JSON().JQ(".user_id").Equal("42.000000"),
 	)
 }
 
@@ -88,11 +88,10 @@ func TestHTTPUpdate(t *testing.T) {
 func TestHTTPDaily(t *testing.T) {
 	date := time.Now()
 	start := date.Format("2006-01-02")
-	Test(t,
-		Description("Get Daily Events"),
-		Get(basePath+"/event/daily?uid=42&date="+start),
-		Expect().Status().Equal(http.StatusOK),
-		Expect().Body().JSON().JQ(".events[0].id").Equal("7.000000"),
-		//Expect().Body().String().Contains(`{\"events\":[{`),
+	hit.Test(t,
+		hit.Description("Get Daily Events"),
+		hit.Get(basePath+"/event/daily?uid=42&date="+start),
+		hit.Expect().Status().Equal(http.StatusOK),
+		hit.Expect().Body().JSON().JQ(".events[0].id").Equal("7.000000"),
 	)
 }
