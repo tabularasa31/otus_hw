@@ -2,7 +2,7 @@ package integration_test
 
 import (
 	"encoding/json"
-	"github.com/Eun/go-hit"
+	gohit "github.com/Eun/go-hit"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/utils"
 	"log"
@@ -38,7 +38,7 @@ func healthCheck(attempts int) error {
 	var err error
 
 	for attempts > 0 {
-		err = hit.Do(hit.Get(healthPath), hit.Expect().Status().Equal(http.StatusOK))
+		err = gohit.Do(gohit.Get(healthPath), gohit.Expect().Status().Equal(http.StatusOK))
 		if err == nil {
 			return nil
 		}
@@ -71,16 +71,16 @@ func TestHTTPUpdate(t *testing.T) {
 		log.Fatal("error marshal json: %w", err)
 	}
 
-	hit.Test(t,
-		hit.Description("Update Event Success"),
-		hit.Post(basePath+"/event/update"),
-		hit.Send().Headers("Content-Type").Add("application/json"),
-		hit.Send().Body().Bytes(body),
-		hit.Expect().Status().Equal(http.StatusOK),
-		hit.Expect().Body().JSON().JQ(".id").Equal("7.000000"),
-		hit.Expect().Body().JSON().JQ(".title").Equal("Test title"),
-		hit.Expect().Body().JSON().JQ(".desc").Equal("Test description"),
-		hit.Expect().Body().JSON().JQ(".user_id").Equal("42.000000"),
+	gohit.Test(t,
+		gohit.Description("Update Event Success"),
+		gohit.Post(basePath+"/event/update"),
+		gohit.Send().Headers("Content-Type").Add("application/json"),
+		gohit.Send().Body().Bytes(body),
+		gohit.Expect().Status().Equal(http.StatusOK),
+		gohit.Expect().Body().JSON().JQ(".id").Equal("7.000000"),
+		gohit.Expect().Body().JSON().JQ(".title").Equal("Test title"),
+		gohit.Expect().Body().JSON().JQ(".desc").Equal("Test description"),
+		gohit.Expect().Body().JSON().JQ(".user_id").Equal("42.000000"),
 	)
 }
 
@@ -88,10 +88,10 @@ func TestHTTPUpdate(t *testing.T) {
 func TestHTTPDaily(t *testing.T) {
 	date := time.Now()
 	start := date.Format("2006-01-02")
-	hit.Test(t,
-		hit.Description("Get Daily Events"),
-		hit.Get(basePath+"/event/daily?uid=42&date="+start),
-		hit.Expect().Status().Equal(http.StatusOK),
-		hit.Expect().Body().JSON().JQ(".events[0].id").Equal("7.000000"),
+	gohit.Test(t,
+		gohit.Description("Get Daily Events"),
+		gohit.Get(basePath+"/event/daily?uid=42&date="+start),
+		gohit.Expect().Status().Equal(http.StatusOK),
+		gohit.Expect().Body().JSON().JQ(".events[0].id").Equal("7.000000"),
 	)
 }
