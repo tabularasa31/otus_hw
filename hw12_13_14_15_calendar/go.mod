@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
-	github.com/Eun/go-hit v0.5.23 // indirect
+	github.com/Eun/go-hit v0.5.23
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/gin-gonic/gin v1.8.2
 	github.com/gofrs/uuid v4.3.1+incompatible // indirect
@@ -12,8 +12,6 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.4.2
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/lib/pq v1.10.7
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/stretchr/testify v1.8.1
 	github.com/swaggo/files v1.0.0
