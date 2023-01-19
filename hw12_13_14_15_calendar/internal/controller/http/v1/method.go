@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -92,7 +91,6 @@ func (r *calendarRoutes) create(c *gin.Context) {
 // @Router      /event/update [post]
 func (r *calendarRoutes) update(c *gin.Context) {
 	var req entity.Event
-	fmt.Printf("--------REQ--------, %v", c.JSON)
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error(err, "http - v1 - update")
 		errorResponse(c, http.StatusBadRequest, "invalid request body")
