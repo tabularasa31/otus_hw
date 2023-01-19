@@ -27,6 +27,9 @@ version: build
 test:
 	go test -cover -race ./internal/...
 
+integration-test: ### run integration-test
+	go clean -testcache && go test -v ./integration-test/...
+
 # ==============================================================================
 # Modules support
 
