@@ -29,6 +29,9 @@ func NewRouter(handler *gin.Engine, logg logger.Interface, u usecase.EventUseCas
 	swaggerHandler := ginSwagger.DisablingWrapHandler(swaggerFiles.Handler, "DISABLE_SWAGGER_HTTP_HANDLER")
 	handler.GET("/swagger/*any", swaggerHandler)
 
+	// Health check
+	handler.GET("/healthz", func(c *gin.Context) { c.Status(http.StatusOK) })
+
 	// Routers
 	v1 := handler.Group("/api/v1")
 	{

@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/BurntSushi/toml v1.2.1 // indirect
+	github.com/Eun/go-hit v0.5.23 // indirect
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/gin-gonic/gin v1.8.2
 	github.com/gofrs/uuid v4.3.1+incompatible // indirect
