@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	// Attempts connection
 	host       = "localhost:8080"
 	healthPath = "http://" + host + "/healthz"
 	attempts   = 20
@@ -53,7 +52,7 @@ func healthCheck(attempts int) error {
 	return err
 }
 
-// HTTP POST: /event/create .
+// HTTP POST: /event/update .
 func TestHTTPUpdate(t *testing.T) {
 	date := time.Now()
 	event := entity.Event{

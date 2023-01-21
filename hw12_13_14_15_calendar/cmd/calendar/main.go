@@ -19,11 +19,6 @@ func init() {
 func main() {
 	flag.Parse()
 
-	//if flag.Arg(0) == "version" {
-	//	printVersion()
-	//	return
-	//}
-
 	// Configuration
 	cfg, err := config.NewConfig(configFile)
 	if err != nil {

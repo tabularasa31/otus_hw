@@ -1,8 +1,14 @@
-# ==============================================================================
-# Main
 include .env.example
 export
 BIN := "./bin/calendar"
+DOCKER_IMG="calendar:develop"
+
+GIT_HASH := $(shell git log --format="%h" -n 1)
+LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
+
+
+# ==============================================================================
+# Main
 
 swag: ### swag init
 	swag init --parseDependency --parseInternal -g internal/controller/http/v1/router.go
@@ -19,10 +25,6 @@ run:
 build:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
 .PHONY: build
-
-version: build
-	$(BIN) version
-.PHONY: version
 
 test:
 	go test -cover -race ./internal/...
@@ -75,12 +77,6 @@ migrate:
 
 # ==============================================================================
 # Docker support
-
-DOCKER_IMG="calendar:develop"
-
-GIT_HASH := $(shell git log --format="%h" -n 1)
-LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
-
 build-img:
 	docker build \
 		--build-arg=LDFLAGS="$(LDFLAGS)" \
