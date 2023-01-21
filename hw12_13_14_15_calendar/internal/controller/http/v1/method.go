@@ -33,17 +33,17 @@ func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l logge
 	}
 }
 
-// @Summary     Create event
-// @Description Create event
-// @ID          create
-// @Tags  	    event
-// @Accept      json
-// @Produce     json
-// @Success     201 {object} entity.Event
-// @Failure     400 {object} response
-// @Failure     422 {object} response
-// @Failure     500 {object} response
-// @Router      /event/create [post]
+// @Summary		Create event
+// @Description	Create event
+// @ID				create
+// @Tags			event
+// @Accept			json
+// @Produce		json
+// @Success		201	{object}	entity.Event
+// @Failure		400	{object}	response
+// @Failure		422	{object}	response
+// @Failure		500	{object}	response
+// @Router			/event/create [post]
 func (r *calendarRoutes) create(c *gin.Context) {
 	var req entity.Event
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -78,17 +78,17 @@ func (r *calendarRoutes) create(c *gin.Context) {
 	c.JSON(http.StatusCreated, &result)
 }
 
-// @Summary     Update event
-// @Description Update event
-// @ID          update
-// @Tags  	    event
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} entity.Event
-// @Failure     400 {object} response
-// @Failure     422 {object} response
-// @Failure     500 {object} response
-// @Router      /event/update [post]
+// @Summary		Update event
+// @Description	Update event
+// @ID				update
+// @Tags			event
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	entity.Event
+// @Failure		400	{object}	response
+// @Failure		422	{object}	response
+// @Failure		500	{object}	response
+// @Router			/event/update [post]
 func (r *calendarRoutes) update(c *gin.Context) {
 	var req entity.Event
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -124,16 +124,16 @@ func (r *calendarRoutes) update(c *gin.Context) {
 	c.JSON(http.StatusOK, result)
 }
 
-// @Summary     Delete event
-// @Description Delete event by event_id
-// @ID          delete
-// @Tags  	    event
-// @Accept      int
-// @Produce     plain
-// @Success     200 {string} string "Deleted Success"
-// @Failure     400 {object} response
-// @Failure     500 {object} response
-// @Router      /event/delete [delete]
+// @Summary		Delete event
+// @Description	Delete event by event_id
+// @ID				delete
+// @Tags			event
+// @Accept			plain
+// @Produce		plain
+// @Success		200	{string}	string	"Deleted Success"
+// @Failure		400	{object}	response
+// @Failure		500	{object}	response
+// @Router			/event/delete [delete]
 func (r *calendarRoutes) delete(c *gin.Context) {
 	param := c.Param("id")
 	id, e := strconv.Atoi(param)
@@ -156,16 +156,16 @@ type eventsResponse struct {
 	Events []entity.Event `json:"events"`
 }
 
-// @Summary     Get daily events
-// @Description Get daily events by userId
-// @ID          daily
-// @Tags  	    event
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} eventsResponse
-// @Failure     400 {object} response
-// @Failure     500 {object} response
-// @Router      /event/daily [get]
+// @Summary		Get daily events
+// @Description	Get daily events by userId
+// @ID				daily
+// @Tags			event
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	eventsResponse
+// @Failure		400	{object}	response
+// @Failure		500	{object}	response
+// @Router			/event/daily [get]
 func (r *calendarRoutes) daily(c *gin.Context) {
 	uid, ok := c.GetQuery("uid")
 	if !ok {
@@ -198,16 +198,16 @@ func (r *calendarRoutes) daily(c *gin.Context) {
 	c.JSON(http.StatusOK, eventsResponse{result})
 }
 
-// @Summary     Get weekly events
-// @Description Get weekly events by userId
-// @ID          weekly
-// @Tags  	    event
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} eventsResponse
-// @Failure     400 {object} response
-// @Failure     500 {object} response
-// @Router      /event/weekly [get]
+// @Summary		Get weekly events
+// @Description	Get weekly events by userId
+// @ID				weekly
+// @Tags			event
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	eventsResponse
+// @Failure		400	{object}	response
+// @Failure		500	{object}	response
+// @Router			/event/weekly [get]
 func (r *calendarRoutes) weekly(c *gin.Context) {
 	uid, ok := c.GetQuery("uid")
 	if !ok {
@@ -240,16 +240,16 @@ func (r *calendarRoutes) weekly(c *gin.Context) {
 	c.JSON(http.StatusOK, eventsResponse{result})
 }
 
-// @Summary     Get monthly events
-// @Description Get monthly events by userId
-// @ID          monthly
-// @Tags  	    event
-// @Accept      json
-// @Produce     json
-// @Success     200 {object} eventsResponse
-// @Failure     400 {object} response
-// @Failure     500 {object} response
-// @Router      /event/monthly [get]
+// @Summary		Get monthly events
+// @Description	Get monthly events by userId
+// @ID				monthly
+// @Tags			event
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	eventsResponse
+// @Failure		400	{object}	response
+// @Failure		500	{object}	response
+// @Router			/event/monthly [get]
 func (r *calendarRoutes) monthly(c *gin.Context) {
 	uid, ok := c.GetQuery("uid")
 	if !ok {

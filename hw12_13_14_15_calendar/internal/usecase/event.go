@@ -102,3 +102,11 @@ func (u *EventUseCase) EventsByDates(ctx context.Context, userID int, start time
 	}
 	return events, nil
 }
+
+func (u *EventUseCase) EventsByTime(ctx context.Context, start time.Time) ([]entity.Event, error) {
+	events, err := u.repo.GetAllEventsByTime(ctx, start)
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - EventsByTime - u.repo.GetAllEventsByTime: %w", err)
+	}
+	return events, nil
+}

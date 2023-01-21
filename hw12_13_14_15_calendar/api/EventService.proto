@@ -31,6 +31,10 @@ message GetEventsResponse {
   repeated Event events = 1;
 }
 
+message Time {
+  string start = 1;
+}
+
 service EventService{
   rpc CreateEvent(Event) returns (Event);
   rpc UpdateEvent(Event) returns (Event);
@@ -38,4 +42,5 @@ service EventService{
   rpc GetDailyEvents(GetEventsRequest) returns (GetEventsResponse);
   rpc GetWeeklyEvents(GetEventsRequest) returns (GetEventsResponse);
   rpc GetMonthlyEvents(GetEventsRequest) returns (GetEventsResponse);
+  rpc GetNotificationEvents(Time) returns (GetEventsResponse);
 }

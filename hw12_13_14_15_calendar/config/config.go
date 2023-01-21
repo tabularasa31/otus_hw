@@ -36,6 +36,34 @@ type (
 		Dsn     string `yaml:"dsn"`
 		PoolMax int    `yaml:"pool_max" env:"PG_POOL_MAX"`
 	}
+
+	SchedulerConf struct {
+		Scheduler  `yaml:"scheduler"`
+		AMQPConfig `yaml:"rabbitmq"`
+	}
+
+	Scheduler struct {
+		DeletePeriod int `yaml:"delete_period"`
+	}
+
+	AMQPConfig struct {
+		Addr         string `yaml:"addr"`
+		Exchange     string `yaml:"exchange"`
+		ExchangeType string `yaml:"exchange_type"`
+		Queue        string `yaml:"queue"`
+		ConsumerTag  string `yaml:"consumer_tag"`
+		BindingKey   string `yaml:"binding_key"`
+		Reliable     string `yaml:"reliable"`
+		Persistent   string `yaml:"persistent"`
+	}
+
+	SenderConf struct {
+		Sender     `yaml:"sender"`
+		AMQPConfig `yaml:"rabbitmq"`
+	}
+
+	Sender struct {
+	}
 )
 
 // NewConfig returns app config.
@@ -55,6 +83,30 @@ func NewConfig(file string) (*Config, error) {
 	v := val.New()
 	if err = v.Struct(cfg); err != nil {
 		return nil, fmt.Errorf("failed config: %w", err)
+	}
+
+	return cfg, nil
+}
+
+// NewSchedulerConfig returns scheduler config.
+func NewSchedulerConfig(file string) (*SchedulerConf, error) {
+	cfg := &SchedulerConf{}
+
+	err := cleanenv.ReadConfig(file, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("ampq config error: %w", err)
+	}
+
+	return cfg, nil
+}
+
+// NewSenderConfig returns sender config.
+func NewSenderConfig(file string) (*SenderConf, error) {
+	cfg := &SenderConf{}
+
+	err := cleanenv.ReadConfig(file, cfg)
+	if err != nil {
+		return nil, fmt.Errorf("ampq config error: %w", err)
 	}
 
 	return cfg, nil

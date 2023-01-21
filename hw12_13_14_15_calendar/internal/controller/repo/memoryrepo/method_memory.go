@@ -108,6 +108,25 @@ func (r *EventRepo) GetEventsByDates(_ context.Context, uid int, start time.Time
 	return userEvents, nil
 }
 
+// GetAllEventsByTime СписокСобытийЗаПериод (дата).
+// Выводит все события за период, которые начинаются в заданный день.
+func (r *EventRepo) GetAllEventsByTime(_ context.Context, start time.Time) ([]entity.Event, error) {
+	var result []entity.Event
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for _, all := range r.events {
+		for _, event := range all {
+			if event.StartTime == start {
+				result = append(result, *event.Dto())
+			}
+		}
+	}
+
+	return result, nil
+}
+
 // isEventTimeBusy проверка на занятость в заданное время.
 func (r *EventRepo) isEventTimeBusy(userEvents map[int]entity.EventDB, newEvent entity.EventDB) bool {
 	newStartTime := newEvent.StartTime

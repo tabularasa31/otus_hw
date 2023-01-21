@@ -127,6 +127,36 @@ func (r *EventRepo) GetEventsByDates(ctx context.Context, uid int, startDate tim
 	return events, nil
 }
 
+// GetAllEventsByTime Список событий пользователя за период.
+// Выводит все события, которые начинаются в заданные дни.
+func (r *EventRepo) GetAllEventsByTime(ctx context.Context, start time.Time) ([]entity.Event, error) {
+	var events []entity.Event
+
+	sql, args, err := r.Postgres.Builder.Select("id, title, descr, user_id, start_time, end_time, notification").
+		From("events").
+		Where("DATE_TRUNC('second', notification) = ?", start.Format("2006-01-02 15:04:05")).
+		ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("postgres - GetAllEventsByTime - r.Builder: %w", err)
+	}
+
+	rows, err := r.Postgres.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("postgres - GetAllEventsByTime - r.Postgres.Pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var eventDB entity.EventDB
+		if er := rows.Scan(&eventDB.ID, &eventDB.Title, &eventDB.Desc, &eventDB.UserID, &eventDB.StartTime, &eventDB.EndTime, &eventDB.Notification); er != nil {
+			return events, fmt.Errorf("postgres - GetAllEventsByTime - rows.Scan: %w", er)
+		}
+		events = append(events, *eventDB.Dto())
+
+	}
+	return events, nil
+}
+
 // isEventTimeBusy проверка на занятость времени.
 func (r *EventRepo) isEventTimeBusy(eventDB entity.EventDB) (bool, error) {
 	query := `SELECT id 

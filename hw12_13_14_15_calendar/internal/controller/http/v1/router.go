@@ -14,11 +14,12 @@ import (
 
 // NewRouter -.
 // Swagger spec:
-// @title       Calendar API
-// @description Homework project
-// @version     1.0
-// @host        localhost:8080
-// @BasePath    /api/v1
+//
+//	@title			Calendar API
+//	@description	Homework project
+//	@version		1.0
+//	@host			localhost:8080
+//	@BasePath		/api/v1
 func NewRouter(handler *gin.Engine, logg logger.Interface, u usecase.EventUseCase) {
 	// Options
 	handler.Use(gin.Logger())

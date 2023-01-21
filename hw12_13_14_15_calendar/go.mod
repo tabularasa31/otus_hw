@@ -13,6 +13,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.4.2
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/lib/pq v1.10.7
+	github.com/rabbitmq/amqp091-go v1.5.0 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/stretchr/testify v1.8.1
 	github.com/swaggo/files v1.0.0

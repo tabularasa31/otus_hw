@@ -189,3 +189,31 @@ func (g *CalendarGRPCService) GetMonthlyEvents(ctx context.Context, in *proto.Ge
 
 	return &proto.GetEventsResponse{Events: events}, nil
 }
+
+func (g *CalendarGRPCService) GetNotificationEvents(ctx context.Context, in *proto.Time) (*proto.GetEventsResponse, error) {
+	start, err := utils.StringToTime(in.GetStart())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
+	}
+
+	result, err := g.u.EventsByTime(ctx, start)
+	if err != nil {
+		g.l.Error("grpc - v1 - notification - EventsByTime: %w", err)
+		return nil, status.Errorf(codes.Internal, "getting events by time problems")
+	}
+
+	events := make([]*proto.Event, 0, len(result))
+	for _, event := range result {
+		events = append(events, &proto.Event{
+			Id:           int64(event.ID),
+			Title:        event.Title,
+			Desc:         event.Desc,
+			UserId:       int64(event.UserID),
+			Start:        event.StartTime,
+			End:          event.EndTime,
+			Notification: event.Notification,
+		})
+	}
+
+	return &proto.GetEventsResponse{Events: events}, nil
+}
