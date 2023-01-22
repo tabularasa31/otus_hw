@@ -46,9 +46,20 @@ func main() {
 
 	client := proto.NewEventServiceClient(conn)
 
-	// Scheduler
+	// Delete old events Scheduler
+	go func() {
+		res, e := deleteOldEvents(client)
+		if e != nil {
+			fmt.Printf("...error while deleting old events: %v\n", e)
+		} else {
+			fmt.Printf("old events deleted successfuly: %s\n", res)
+		}
+		time.Sleep(24 * time.Hour)
+	}()
+
+	// Notifications Scheduler
 	for {
-		res, e := checkEvents(client)
+		res, e := checkEventsNotifications(client)
 		if e != nil {
 			fmt.Println(e)
 		}
@@ -67,8 +78,8 @@ func main() {
 				}
 
 				err = ch.PublishWithContext(ctx,
-					"notifications", // exchange
-					"",              // routing key
+					"events",        // exchange
+					"notifications", // routing key
 					false,           // mandatory
 					false,           // immediate
 					amqp.Publishing{
@@ -82,10 +93,11 @@ func main() {
 		}
 		time.Sleep(time.Second)
 	}
+
 }
 
-// checkEvents get events by date notification
-func checkEvents(c proto.EventServiceClient) (*proto.GetEventsResponse, error) {
+// checkEventsNotifications get events by date notification
+func checkEventsNotifications(c proto.EventServiceClient) (*proto.GetEventsResponse, error) {
 	t := time.Now().Format("2006-01-02 15:04:05")
 	req := &proto.Time{Start: t}
 
@@ -94,6 +106,18 @@ func checkEvents(c proto.EventServiceClient) (*proto.GetEventsResponse, error) {
 		return nil, fmt.Errorf("...error while calling GetNotificationEvents RPC: %v", err)
 	}
 	return res, nil
+}
+
+// deleteOldEvents delete events older 1 year
+func deleteOldEvents(c proto.EventServiceClient) (string, error) {
+	t := time.Now().AddDate(-1, 0, 0).Format("2006-01-02")
+	req := &proto.Time{Start: t}
+
+	res, err := c.DeleteOldEvents(context.Background(), req)
+	if err != nil {
+		return "", fmt.Errorf("...error while calling DeleteOldEvents RPC: %v", err)
+	}
+	return res.String(), nil
 }
 
 // failOnError wrap error

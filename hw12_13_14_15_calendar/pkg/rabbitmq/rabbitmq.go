@@ -14,13 +14,13 @@ func NewRabbitMQConn(addr string) (*amqp.Connection, *amqp.Channel, error) {
 	failOnError(err, "...failed to open a channel")
 
 	err = ch.ExchangeDeclare(
-		"notifications", // name
-		"fanout",        // type
-		true,            // durable
-		false,           // auto-deleted
-		false,           // internal
-		false,           // no-wait
-		nil,             // arguments
+		"events", // name
+		"direct", // type
+		true,     // durable
+		false,    // auto-deleted
+		false,    // internal
+		false,    // no-wait
+		nil,      // arguments
 	)
 	failOnError(err, "...failed to declare an exchange")
 

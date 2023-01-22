@@ -31,14 +31,6 @@ func (r *EventRepo) CreateEvent(_ context.Context, eventDB *entity.EventDB) (*en
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	// Check if event time already busy
-	userEvents, ok := r.events[eventDB.UserID]
-	if !ok {
-		r.events[eventDB.UserID] = make(map[int]entity.EventDB)
-	} else if !r.isEventTimeBusy(userEvents, *eventDB) {
-		return nil, errapp.ErrEventTimeBusy
-	}
-
 	// Create unique event ID
 	eventDB.ID = int(uuid.New().ID())
 
@@ -61,10 +53,6 @@ func (r *EventRepo) UpdateEvent(_ context.Context, eventDB *entity.EventDB) (*en
 	updatedEvent, ok := userEvents[eventDB.ID]
 	if !ok {
 		return nil, errapp.ErrEventNotFound
-	}
-
-	if !r.isEventTimeBusy(userEvents, *eventDB) {
-		return nil, errapp.ErrEventTimeBusy
 	}
 
 	updatedEvent.Title = eventDB.Title
@@ -127,17 +115,17 @@ func (r *EventRepo) GetAllEventsByTime(_ context.Context, start time.Time) ([]en
 	return result, nil
 }
 
-// isEventTimeBusy проверка на занятость в заданное время.
-func (r *EventRepo) isEventTimeBusy(userEvents map[int]entity.EventDB, newEvent entity.EventDB) bool {
-	newStartTime := newEvent.StartTime
-	newEndTime := newEvent.EndTime
-	for _, userEvent := range userEvents {
-		oldStartTime := userEvent.StartTime
-		oldEndTime := userEvent.EndTime
-		if (newStartTime.After(oldStartTime) && newStartTime.Before(oldEndTime)) ||
-			(newEndTime.After(oldStartTime) && newEndTime.Before(oldEndTime)) {
-			return false
+func (r *EventRepo) DeleteOldEventsFromRepo(_ context.Context, date time.Time) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for _, userEvents := range r.events {
+		for _, event := range userEvents {
+			if event.StartTime.Before(date) {
+				delete(r.events, event.ID)
+				return nil
+			}
 		}
 	}
-	return true
+	return errapp.ErrEventNotFound
 }

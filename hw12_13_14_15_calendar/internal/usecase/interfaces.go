@@ -14,5 +14,6 @@ type (
 		DeleteEvent(context.Context, int) error
 		GetEventsByDates(context.Context, int, time.Time, time.Time) ([]entity.Event, error)
 		GetAllEventsByTime(context.Context, time.Time) ([]entity.Event, error)
+		DeleteOldEventsFromRepo(context.Context, time.Time) error
 	}
 )

@@ -94,7 +94,7 @@ func (g *CalendarGRPCService) UpdateEvent(ctx context.Context, req *proto.Event)
 func (g *CalendarGRPCService) DeleteEvent(ctx context.Context, uid *proto.UID) (*proto.Response, error) {
 	err := g.u.Delete(ctx, int(uid.GetUid()))
 	if err != nil {
-		g.l.Error(err, "grpc - v1 - delete")
+		g.l.Error(err, "grpc - v1 - DeleteEvent")
 		return &proto.Response{Status: "event deleting problems"}, status.Errorf(codes.Internal, "event deleting problems")
 	}
 	return &proto.Response{Status: "OK"}, nil
@@ -216,4 +216,17 @@ func (g *CalendarGRPCService) GetNotificationEvents(ctx context.Context, in *pro
 	}
 
 	return &proto.GetEventsResponse{Events: events}, nil
+}
+func (g *CalendarGRPCService) DeleteOldEvents(ctx context.Context, in *proto.Time) (*proto.Response, error) {
+	start, err := utils.StringToDay(in.GetStart())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "bad start date")
+	}
+
+	e := g.u.DeleteOldEvents(ctx, start)
+	if e != nil {
+		g.l.Error(e, "grpc - v1 - DeleteOldEvent")
+		return &proto.Response{Status: "old events deleting problems"}, status.Errorf(codes.Internal, "old events deleting problems")
+	}
+	return &proto.Response{Status: "OK"}, nil
 }

@@ -43,4 +43,5 @@ service EventService{
   rpc GetWeeklyEvents(GetEventsRequest) returns (GetEventsResponse);
   rpc GetMonthlyEvents(GetEventsRequest) returns (GetEventsResponse);
   rpc GetNotificationEvents(Time) returns (GetEventsResponse);
+  rpc DeleteOldEvents(Time) returns (Response);
 }

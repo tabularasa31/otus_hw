@@ -22,32 +22,32 @@ func main() {
 	defer mqConn.Close()
 
 	q, err := ch.QueueDeclare(
-		"",    // name
-		false, // durable
-		false, // delete when unused
-		true,  // exclusive
-		false, // no-wait
-		nil,   // arguments
+		"notifications", // name
+		false,           // durable
+		false,           // delete when unused
+		true,            // exclusive
+		false,           // no-wait
+		nil,             // arguments
 	)
 	failOnError(err, "...failed to declare a queue")
 
 	err = ch.QueueBind(
 		q.Name,          // queue name
-		"",              // routing key
-		"notifications", // exchange
+		"notifications", // routing key
+		"events",        // exchange
 		false,
 		nil,
 	)
 	failOnError(err, "...failed to bind a queue")
 
 	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
+		q.Name,   // queue
+		"sender", // consumer
+		true,     // auto-ack
+		false,    // exclusive
+		false,    // no-local
+		false,    // no-wait
+		nil,      // args
 	)
 	failOnError(err, "...failed to register a consumer")
 

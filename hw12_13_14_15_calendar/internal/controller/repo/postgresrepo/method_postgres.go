@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
 )
@@ -22,14 +21,6 @@ func New(pg *postgres.Postgres) *EventRepo {
 
 // CreateEvent Создать (событие).
 func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
-	check, er := r.isEventTimeBusy(*eventDB)
-	if check {
-		return nil, errapp.ErrEventTimeBusy
-	}
-	if er != nil {
-		return nil, fmt.Errorf("postgres - CreateEvent - r.isEventTimeBusy: %w", er)
-	}
-
 	sql, args, err := r.Postgres.Builder.
 		Insert("events").
 		Columns("user_id, title, descr, start_time, end_time, notification").
@@ -56,14 +47,6 @@ func (r *EventRepo) CreateEvent(ctx context.Context, eventDB *entity.EventDB) (*
 
 // UpdateEvent Обновить (событие).
 func (r *EventRepo) UpdateEvent(ctx context.Context, eventDB *entity.EventDB) (*entity.Event, error) {
-	check, er := r.isEventTimeBusy(*eventDB)
-	if check {
-		return nil, errapp.ErrEventTimeBusy
-	}
-	if er != nil {
-		return nil, fmt.Errorf("postgres - UpdateEvent - r.isEventTimeBusy: %w", er)
-	}
-
 	sql, args, err := r.Postgres.Builder.
 		Update("events").
 		Set("user_id", eventDB.UserID).
@@ -157,21 +140,9 @@ func (r *EventRepo) GetAllEventsByTime(ctx context.Context, start time.Time) ([]
 	return events, nil
 }
 
-// isEventTimeBusy проверка на занятость времени.
-func (r *EventRepo) isEventTimeBusy(eventDB entity.EventDB) (bool, error) {
-	query := `SELECT id 
-			  FROM events 
-			  WHERE user_id = $1 
-			    AND start_time BETWEEN $2 AND $3
-			  LIMIT 1`
-
-	rows, err := r.Postgres.Pool.Query(context.Background(), query, eventDB.UserID, eventDB.StartTime, eventDB.EndTime)
-	if err != nil {
-		return true, fmt.Errorf("postgres - isEventTimeBusy - r.Postgres.Pool.Query: %w", err)
-	}
-	defer rows.Close()
-
-	return rows.Next(), nil
+func (r *EventRepo) DeleteOldEventsFromRepo(ctx context.Context, date time.Time) error {
+	_, err := r.Postgres.Pool.Exec(ctx, `delete from events where DATE_TRUNC('day', start_time) < $1`, date)
+	return err
 }
 
 func (r *EventRepo) result(ctx context.Context, id int) (*entity.Event, error) {

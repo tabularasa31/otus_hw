@@ -110,3 +110,12 @@ func (u *EventUseCase) EventsByTime(ctx context.Context, start time.Time) ([]ent
 	}
 	return events, nil
 }
+
+func (u *EventUseCase) DeleteOldEvents(ctx context.Context, date time.Time) error {
+	fmt.Println("------Starting DeleteOldEventsFromRepo --------")
+	err := u.repo.DeleteOldEventsFromRepo(ctx, date)
+	if err != nil {
+		return fmt.Errorf("EventUseCase - DeleteOldEvents - u.repo.DeleteOldEventsFromRepo: %w", err)
+	}
+	return nil
+}
