@@ -34,6 +34,10 @@ func (r *EventRepo) CreateEvent(_ context.Context, eventDB *entity.EventDB) (*en
 	// Create unique event ID
 	eventDB.ID = int(uuid.New().ID())
 
+	_, ok := r.events[eventDB.UserID]
+	if !ok {
+		r.events[eventDB.UserID] = make(map[int]entity.EventDB)
+	}
 	r.events[eventDB.UserID][eventDB.ID] = *eventDB
 	res := r.events[eventDB.UserID][eventDB.ID]
 
