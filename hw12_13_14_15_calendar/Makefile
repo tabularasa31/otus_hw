@@ -1,30 +1,34 @@
 include .env.example
 export
-BIN := "./bin/calendar"
+BIN="./bin"
+BIN_CALENDAR="./bin/calendar"
+BIN_SCHEDULER="./bin/scheduler"
+BIN_SENDER="./bin/sender"
+
 DOCKER_IMG="calendar:develop"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
-
 # ==============================================================================
 # Main
 
 swag: ### swag init
-	swag init --parseDependency --parseInternal -g internal/controller/http/v1/router.go
+	swag init -g internal/controller/http/v1/router.go
 
 generate:
 	 go generate ./...
 
-run:
-	go mod tidy && go mod download && \
-    DISABLE_SWAGGER_HTTP_HANDLER='' GIN_MODE=debug CGO_ENABLED=0 \
-	$(BIN) -config ../../config/config.yml
-.PHONY: run
-
 build:
-	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+	go build -v -o $(BIN_CALENDAR) -ldflags "$(LDFLAGS)" ./cmd/calendar
+	go build -v -o $(BIN_SCHEDULER) -ldflags "$(LDFLAGS)" ./cmd/calendar_scheduler
+	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/calendar_sender
 .PHONY: build
+
+run: build
+	$(BIN_CALENDAR) -config ./config/config.yml
+	$(BIN_SCHEDULER)
+	$(BIN_SENDER)
 
 test:
 	go test -cover -race ./internal/...
