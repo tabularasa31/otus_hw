@@ -3,7 +3,7 @@ rabbitmq:
   addr: "amqp://guest:guest@localhost:5672/"
   exchange: calendar
   exchange_type: direct
-  queue: calendar-queue
+  queue: notifications
   consumer_tag: calendar-consumer
   binding_key: calendar-key
   reliable: true

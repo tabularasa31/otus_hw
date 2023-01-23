@@ -2,11 +2,11 @@ package httpserver
 
 import (
 	"context"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 )
 
 const (
@@ -19,10 +19,10 @@ type Server struct {
 	server          *http.Server
 	notify          chan error
 	shutdownTimeout time.Duration
-	logger          logger.Logger
+	logger          zap.SugaredLogger
 }
 
-func New(handler http.Handler, conf config.HTTP, logg *logger.Logger) *Server {
+func New(handler http.Handler, conf config.HTTP, logg *zap.SugaredLogger) *Server {
 	httpServer := &http.Server{
 		Handler:      handler,
 		ReadTimeout:  _defaultReadTimeout,
@@ -43,7 +43,7 @@ func New(handler http.Handler, conf config.HTTP, logg *logger.Logger) *Server {
 
 func (s *Server) Start() {
 	go func() {
-		s.notify <- http.ListenAndServe(s.server.Addr, loggingMiddleware(s.server.Handler, s.logger))
+		s.notify <- http.ListenAndServe(s.server.Addr, loggingMiddleware(s.server.Handler, &s.logger))
 		close(s.notify)
 	}()
 }

@@ -1,6 +1,6 @@
 include .env.example
 export
-BIN="./bin"
+
 BIN_CALENDAR="./bin/calendar"
 BIN_SCHEDULER="./bin/scheduler"
 BIN_SENDER="./bin/sender"
@@ -23,12 +23,12 @@ build:
 	go build -v -o $(BIN_CALENDAR) -ldflags "$(LDFLAGS)" ./cmd/calendar
 	go build -v -o $(BIN_SCHEDULER) -ldflags "$(LDFLAGS)" ./cmd/calendar_scheduler
 	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/calendar_sender
-.PHONY: build
+
 
 run: build
 	$(BIN_CALENDAR) -config ./config/config.yml
-	$(BIN_SCHEDULER)
-	$(BIN_SENDER)
+	$(BIN_SCHEDULER) -config ./config/scheduler_config.yml
+	$(BIN_SENDER) -config ./config/sender_config.yml
 
 test:
 	go test -cover -race ./internal/...
@@ -72,7 +72,6 @@ lint: install-lint-deps ### check by golangci linter
 
 migrate:
 	goose -dir migrations up
-.PHONY: migrate
 
 
 # ==============================================================================
@@ -90,4 +89,6 @@ build-img:
 
 run-img: build-img
 	docker run $(DOCKER_IMG)
-.PHONY: run-img
+
+
+.PHONY: build run build-img run-img test lint migrate

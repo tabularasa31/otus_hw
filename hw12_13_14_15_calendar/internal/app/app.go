@@ -1,7 +1,7 @@
 package app
 
 import (
-	"fmt"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 	"log"
 	"net"
 	"os"
@@ -16,7 +16,6 @@ import (
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/grpcserver"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/httpserver"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
 )
 
@@ -30,7 +29,7 @@ func Run(cfg *config.Config) {
 	if cfg.Storage.Type == "postgres" {
 		pg, err := postgres.New(cfg)
 		if err != nil {
-			log.Fatal(fmt.Errorf("app - Run - repo - postgres.New: %w", err))
+			log.Fatalf("app - Run - repo - postgres.New: %v", err)
 		}
 		defer pg.Close()
 		repo = postgresrepo.New(pg)
@@ -41,9 +40,6 @@ func Run(cfg *config.Config) {
 	// Use case
 	eventUseCase := usecase.New(repo)
 
-	// RabbitMQ RPC Server
-	//rmqRouter := amqprpc.NewRouter(eventUseCase)
-
 	// HTTP Server
 	handler := gin.New()
 	v1.NewRouter(handler, logg, *eventUseCase)
@@ -52,11 +48,11 @@ func Run(cfg *config.Config) {
 	// GRPC Server
 	lis, err := net.Listen("tcp", cfg.GRPC.Addr)
 	if err != nil {
-		logg.Fatal(fmt.Errorf("app - Run - net.Listen: %w", err))
+		logg.Fatalf("app - Run - net.Listen: %v", err)
 	}
 	defer func() {
 		if e := lis.Close(); e != nil {
-			logg.Fatal("...failed to close client, error: %v\n", e)
+			logg.Fatalf("...failed to close client, error: %v\n", e)
 		}
 	}()
 
@@ -70,13 +66,13 @@ func Run(cfg *config.Config) {
 	case s := <-interrupt:
 		logg.Info("app - Run - signal: " + s.String())
 	case e := <-httpServer.Notify():
-		logg.Error(fmt.Errorf("app - Run - httpServer.Notify: %w", e))
+		logg.Errorf("app - Run - httpServer.Notify: %v", e)
 	}
 
 	// Shutdown
 	errServer := httpServer.Shutdown()
 	if errServer != nil {
-		logg.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
+		logg.Errorf("app - Run - httpServer.Shutdown: %v", err)
 	}
 
 	grpcServer.Shutdown()

@@ -2,25 +2,25 @@ package grpcv1
 
 import (
 	"context"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/dateutils"
+	"go.uber.org/zap"
 	"time"
 
 	proto "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/api"
 	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type CalendarGRPCService struct {
 	u usecase.EventUseCase
-	l logger.Interface
+	l zap.SugaredLogger
 	proto.UnimplementedEventServiceServer
 }
 
-func NewCalendarGRPCService(u usecase.EventUseCase, l logger.Interface) *CalendarGRPCService {
+func NewCalendarGRPCService(u usecase.EventUseCase, l zap.SugaredLogger) *CalendarGRPCService {
 	return &CalendarGRPCService{u: u, l: l}
 }
 
@@ -102,7 +102,7 @@ func (g *CalendarGRPCService) DeleteEvent(ctx context.Context, uid *proto.UID) (
 
 func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := utils.StringToDay(in.GetStart())
+	start, err := dateutils.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -132,7 +132,7 @@ func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context, in *proto.GetE
 
 func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := utils.StringToDay(in.GetStart())
+	start, err := dateutils.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -162,7 +162,7 @@ func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context, in *proto.Get
 
 func (g *CalendarGRPCService) GetMonthlyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := utils.StringToDay(in.GetStart())
+	start, err := dateutils.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -191,7 +191,7 @@ func (g *CalendarGRPCService) GetMonthlyEvents(ctx context.Context, in *proto.Ge
 }
 
 func (g *CalendarGRPCService) GetNotificationEvents(ctx context.Context, in *proto.Time) (*proto.GetEventsResponse, error) {
-	start, err := utils.StringToTime(in.GetStart())
+	start, err := dateutils.StringToTime(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -218,7 +218,7 @@ func (g *CalendarGRPCService) GetNotificationEvents(ctx context.Context, in *pro
 	return &proto.GetEventsResponse{Events: events}, nil
 }
 func (g *CalendarGRPCService) DeleteOldEvents(ctx context.Context, in *proto.Time) (*proto.Response, error) {
-	start, err := utils.StringToDay(in.GetStart())
+	start, err := dateutils.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad start date")
 	}

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	proto "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/api"
@@ -22,13 +23,21 @@ type Notification struct {
 	UID   string `json:"uid"`
 }
 
+var configFile string
+
+func init() {
+	flag.StringVar(&configFile, "config", "./config/scheduler_config.yml", "Path to configuration file")
+}
+
 func main() {
+	flag.Parse()
+
 	// Configuration
-	cfg, err := config.NewSchedulerConfig("./config/scheduler_config.yml")
+	cfg, err := config.NewSchedulerConfig(configFile)
 	failOnError(err, "scheduler config error")
 
 	// AMQP
-	mqConn, ch, err := rabbitmq.NewRabbitMQConn(cfg.Addr)
+	mqConn, ch, err := rabbitmq.NewRabbitMQConn(&cfg.AMQPConfig)
 
 	// Close Channel
 	defer ch.Close()
@@ -78,10 +87,10 @@ func main() {
 				}
 
 				err = ch.PublishWithContext(ctx,
-					"events",        // exchange
-					"notifications", // routing key
-					false,           // mandatory
-					false,           // immediate
+					cfg.Exchange,   // exchange
+					cfg.BindingKey, // routing key
+					false,          // mandatory
+					false,          // immediate
 					amqp.Publishing{
 						ContentType: "text/plain",
 						Body:        send,

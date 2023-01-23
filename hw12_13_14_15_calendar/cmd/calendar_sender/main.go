@@ -1,19 +1,28 @@
 package main
 
 import (
+	"flag"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/rabbitmq"
 	"log"
 )
 
+var configFile string
+
+func init() {
+	flag.StringVar(&configFile, "config", "./config/sender_config.yml", "Path to configuration file")
+}
+
 func main() {
+	flag.Parse()
+
 	// Configuration
-	cfg, err := config.NewSenderConfig("./config/sender_config.yml")
+	cfg, err := config.NewSenderConfig(configFile)
 	failOnError(err, "sender config error")
 	_ = cfg
 
 	// AMPQ consumer
-	mqConn, ch, err := rabbitmq.NewRabbitMQConn(cfg.Addr)
+	mqConn, ch, err := rabbitmq.NewRabbitMQConn(&cfg.AMQPConfig)
 
 	// Close Channel
 	defer ch.Close()
@@ -22,19 +31,19 @@ func main() {
 	defer mqConn.Close()
 
 	q, err := ch.QueueDeclare(
-		"notifications", // name
-		false,           // durable
-		false,           // delete when unused
-		true,            // exclusive
-		false,           // no-wait
-		nil,             // arguments
+		cfg.Queue, // name
+		false,     // durable
+		false,     // delete when unused
+		true,      // exclusive
+		false,     // no-wait
+		nil,       // arguments
 	)
 	failOnError(err, "...failed to declare a queue")
 
 	err = ch.QueueBind(
-		q.Name,          // queue name
-		"notifications", // routing key
-		"events",        // exchange
+		q.Name,         // queue name
+		cfg.BindingKey, // routing key
+		cfg.Exchange,   // exchange
 		false,
 		nil,
 	)
