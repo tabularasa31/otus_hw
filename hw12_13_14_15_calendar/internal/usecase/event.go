@@ -3,7 +3,7 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/dateutils"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils"
 	"time"
 
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"

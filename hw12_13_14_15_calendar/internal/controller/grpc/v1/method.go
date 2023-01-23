@@ -2,7 +2,7 @@ package grpcv1
 
 import (
 	"context"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/dateutils"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils"
 	"go.uber.org/zap"
 	"time"
 

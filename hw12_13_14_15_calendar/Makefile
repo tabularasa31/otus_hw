@@ -12,7 +12,6 @@ LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%d
 
 # ==============================================================================
 # Main
-
 swag: ### swag init
 	swag init -g internal/controller/http/v1/router.go
 
@@ -25,7 +24,7 @@ build:
 	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/calendar_sender
 
 
-run: build
+run: build swag
 	$(BIN_CALENDAR) -config ./config/config.yml
 	$(BIN_SCHEDULER) -config ./config/scheduler_config.yml
 	$(BIN_SENDER) -config ./config/sender_config.yml
