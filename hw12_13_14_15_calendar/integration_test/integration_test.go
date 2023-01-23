@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	gohit "github.com/Eun/go-hit"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
 	"log"
 	"net/http"
 	"os"
