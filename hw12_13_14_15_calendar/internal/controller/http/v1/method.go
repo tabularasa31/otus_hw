@@ -1,7 +1,7 @@
 package v1
 
 import (
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils"
+	dateutils "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils"
 	"go.uber.org/zap"
 	"net/http"
 	"strconv"
