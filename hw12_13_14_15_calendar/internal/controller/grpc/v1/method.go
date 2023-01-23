@@ -102,7 +102,7 @@ func (g *CalendarGRPCService) DeleteEvent(ctx context.Context, uid *proto.UID) (
 
 func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := dateutils.StringToDay(in.GetStart())
+	start, err := dateconv.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -132,7 +132,7 @@ func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context, in *proto.GetE
 
 func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := dateutils.StringToDay(in.GetStart())
+	start, err := dateconv.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -162,7 +162,7 @@ func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context, in *proto.Get
 
 func (g *CalendarGRPCService) GetMonthlyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
-	start, err := dateutils.StringToDay(in.GetStart())
+	start, err := dateconv.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -191,7 +191,7 @@ func (g *CalendarGRPCService) GetMonthlyEvents(ctx context.Context, in *proto.Ge
 }
 
 func (g *CalendarGRPCService) GetNotificationEvents(ctx context.Context, in *proto.Time) (*proto.GetEventsResponse, error) {
-	start, err := dateutils.StringToTime(in.GetStart())
+	start, err := dateconv.StringToTime(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad event date")
 	}
@@ -218,7 +218,7 @@ func (g *CalendarGRPCService) GetNotificationEvents(ctx context.Context, in *pro
 	return &proto.GetEventsResponse{Events: events}, nil
 }
 func (g *CalendarGRPCService) DeleteOldEvents(ctx context.Context, in *proto.Time) (*proto.Response, error) {
-	start, err := dateutils.StringToDay(in.GetStart())
+	start, err := dateconv.StringToDay(in.GetStart())
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "bad start date")
 	}

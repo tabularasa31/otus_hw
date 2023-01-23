@@ -1,7 +1,7 @@
 package entity
 
 import (
-	dateutils "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils"
+	dateconv "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils"
 	"time"
 )
 
@@ -18,11 +18,11 @@ type (
 )
 
 func (e *EventDB) Dto() *Event {
-	date := dateutils.TimeToString(e.StartTime)
+	date := dateconv.TimeToString(e.StartTime)
 
-	d := dateutils.TimeToString(e.EndTime)
+	d := dateconv.TimeToString(e.EndTime)
 
-	n := dateutils.TimeToString(e.Notification)
+	n := dateconv.TimeToString(e.Notification)
 
 	event := Event{
 		ID:           e.ID,

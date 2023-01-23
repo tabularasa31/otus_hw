@@ -22,17 +22,17 @@ func New(r EventRepo) *EventUseCase {
 }
 
 func (u *EventUseCase) Create(ctx context.Context, event entity.Event) (*entity.Event, error) {
-	date, err := dateutils.StringToTime(event.StartTime)
+	date, err := dateconv.StringToTime(event.StartTime)
 	if err != nil {
 		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(StartTime): %w", err)
 	}
 
-	d, err := dateutils.StringToTime(event.EndTime)
+	d, err := dateconv.StringToTime(event.EndTime)
 	if err != nil {
 		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(EndTime): %w", err)
 	}
 
-	n, err := dateutils.StringToTime(event.Notification)
+	n, err := dateconv.StringToTime(event.Notification)
 	if err != nil {
 		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(Notification): %w", err)
 	}
@@ -55,17 +55,17 @@ func (u *EventUseCase) Create(ctx context.Context, event entity.Event) (*entity.
 }
 
 func (u *EventUseCase) Update(ctx context.Context, event entity.Event) (*entity.Event, error) {
-	date, err := dateutils.StringToTime(event.StartTime)
+	date, err := dateconv.StringToTime(event.StartTime)
 	if err != nil {
 		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(StartTime): %w", err)
 	}
 
-	d, err := dateutils.StringToTime(event.EndTime)
+	d, err := dateconv.StringToTime(event.EndTime)
 	if err != nil {
 		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(EndTime): %w", err)
 	}
 
-	n, err := dateutils.StringToTime(event.Notification)
+	n, err := dateconv.StringToTime(event.Notification)
 	if err != nil {
 		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(Notification): %w", err)
 	}

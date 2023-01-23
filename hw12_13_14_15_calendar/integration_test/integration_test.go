@@ -60,9 +60,9 @@ func TestHTTPUpdate(t *testing.T) {
 		Title:        "Test title",
 		Desc:         "Test description",
 		UserID:       42,
-		StartTime:    dateutils.TimeToString(date.Add(time.Hour)),
-		EndTime:      dateutils.TimeToString(date.Add(2 * time.Hour)),
-		Notification: dateutils.TimeToString(date),
+		StartTime:    dateconv.TimeToString(date.Add(time.Hour)),
+		EndTime:      dateconv.TimeToString(date.Add(2 * time.Hour)),
+		Notification: dateconv.TimeToString(date),
 	}
 
 	body, err := json.Marshal(event)
