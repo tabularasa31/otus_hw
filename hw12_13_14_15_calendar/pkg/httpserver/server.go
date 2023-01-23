@@ -2,10 +2,11 @@ package httpserver
 
 import (
 	"context"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 	"net/http"
 	"time"
+
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 )
 
 const (

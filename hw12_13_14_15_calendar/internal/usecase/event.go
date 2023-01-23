@@ -3,8 +3,10 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"time"
+
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/utils"
 )
 
 // EventUseCase -.
@@ -19,22 +21,73 @@ func New(r EventRepo) *EventUseCase {
 	}
 }
 
-func (u *EventUseCase) Create(ctx context.Context, event entity.Event) error {
-	err := u.repo.CreateEvent(ctx, event)
+func (u *EventUseCase) Create(ctx context.Context, event entity.Event) (*entity.Event, error) {
+	date, err := utils.StringToTime(event.StartTime)
 	if err != nil {
-		return fmt.Errorf("EventUseCase - CreateEvent - u.repo.CreateEvent: %w", err)
+		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(StartTime): %w", err)
 	}
-	return nil
+
+	d, err := utils.StringToTime(event.EndTime)
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(EndTime): %w", err)
+	}
+
+	n, err := utils.StringToTime(event.Notification)
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - Create - StringToTime(Notification): %w", err)
+	}
+
+	eventDB := entity.EventDB{
+		Title:        event.Title,
+		Desc:         event.Desc,
+		UserID:       event.UserID,
+		StartTime:    date,
+		EndTime:      d,
+		Notification: n,
+	}
+
+	result, err := u.repo.CreateEvent(ctx, &eventDB)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
-func (u *EventUseCase) Update(ctx context.Context, event entity.Event) error {
-	err := u.repo.UpdateEvent(ctx, event)
+func (u *EventUseCase) Update(ctx context.Context, event entity.Event) (*entity.Event, error) {
+	date, err := utils.StringToTime(event.StartTime)
 	if err != nil {
-		return fmt.Errorf("EventUseCase - UpdateEvent - u.repo.UpdateEvent: %w", err)
+		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(StartTime): %w", err)
 	}
-	return nil
+
+	d, err := utils.StringToTime(event.EndTime)
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(EndTime): %w", err)
+	}
+
+	n, err := utils.StringToTime(event.Notification)
+	if err != nil {
+		return nil, fmt.Errorf("EventUseCase - Update - StringToTime(Notification): %w", err)
+	}
+
+	eventDB := entity.EventDB{
+		ID:           event.ID,
+		Title:        event.Title,
+		Desc:         event.Desc,
+		UserID:       event.UserID,
+		StartTime:    date,
+		EndTime:      d,
+		Notification: n,
+	}
+
+	res, err := u.repo.UpdateEvent(ctx, &eventDB)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
-func (u *EventUseCase) Delete(ctx context.Context, userID int32) error {
+
+func (u *EventUseCase) Delete(ctx context.Context, userID int) error {
 	err := u.repo.DeleteEvent(ctx, userID)
 	if err != nil {
 		return fmt.Errorf("EventUseCase - DeleteEvent - u.repo.DeleteEvent: %w", err)
@@ -42,26 +95,10 @@ func (u *EventUseCase) Delete(ctx context.Context, userID int32) error {
 	return nil
 }
 
-func (u *EventUseCase) DailyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
-	events, err := u.repo.GetDailyEvents(ctx, date)
+func (u *EventUseCase) EventsByDates(ctx context.Context, userID int, start time.Time, end time.Time) ([]entity.Event, error) {
+	events, err := u.repo.GetEventsByDates(ctx, userID, start, end)
 	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - GetDailyEvents - u.repo.GetDailyEvents: %w", err)
-	}
-	return events, nil
-}
-
-func (u *EventUseCase) WeeklyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
-	events, err := u.repo.GetWeeklyEvents(ctx, date)
-	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - GetWeeklyEvents - u.repo.GetWeeklyEvents: %w", err)
-	}
-	return events, nil
-}
-
-func (u *EventUseCase) GetMonthlyEvents(ctx context.Context, date time.Time) ([]entity.Event, error) {
-	events, err := u.repo.GetMonthlyEvents(ctx, date)
-	if err != nil {
-		return nil, fmt.Errorf("EventUseCase - MonthlyEvents - u.repo.MonthlyEvents: %w", err)
+		return nil, fmt.Errorf("EventUseCase - EventsByDates - u.repo.GetEventsByDates: %w", err)
 	}
 	return events, nil
 }

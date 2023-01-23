@@ -1,9 +1,10 @@
 package config
 
 import (
-	"github.com/stretchr/testify/require"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewConfig(t *testing.T) {
@@ -30,22 +31,3 @@ grpc:
 
 	_ = os.Remove(file.Name())
 }
-
-//func TestFailedConfig(t *testing.T) {
-//	file, _ := os.CreateTemp("/tmp", "config.*.yml")
-//	_, err := file.Write([]byte(
-//		`logger:
-//  level: debug
-//storage:
-//  type: memory
-//  dsn: ''
-//http:
-//  addr: 'localhost:foo'
-//grpc:
-//  addr: 'localhost:bar'
-//`))
-//	conf, err := NewConfig(file.Name())
-//	require.Error(t, err)
-//	_ = conf
-//	_ = os.Remove(file.Name())
-//}

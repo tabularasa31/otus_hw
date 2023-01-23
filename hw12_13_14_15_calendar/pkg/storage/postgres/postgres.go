@@ -3,14 +3,17 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"time"
+
+	"github.com/Masterminds/squirrel"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 )
 
 const (
 	_defaultMaxPoolSize  = 1
-	_defaultConnAttempts = 10
+	_defaultConnAttempts = 5
 	_defaultConnTimeout  = time.Second
 )
 
@@ -19,17 +22,20 @@ type Postgres struct {
 	maxPoolSize  int
 	connAttempts int
 	connTimeout  time.Duration
+	Builder      squirrel.StatementBuilderType
 	Pool         *pgxpool.Pool
 }
 
-func New(url string) (*Postgres, error) {
+func New(cfg *config.Config) (*Postgres, error) {
 	pg := &Postgres{
 		maxPoolSize:  _defaultMaxPoolSize,
 		connAttempts: _defaultConnAttempts,
 		connTimeout:  _defaultConnTimeout,
 	}
 
-	poolConfig, err := pgxpool.ParseConfig(url)
+	pg.Builder = squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar)
+
+	poolConfig, err := pgxpool.ParseConfig(cfg.Postgres.Dsn)
 	if err != nil {
 		return nil, fmt.Errorf("postgres - NewPostgres - pgxpool.ParseConfig: %w", err)
 	}

@@ -2,37 +2,62 @@ package app
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
-	v1 "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/http/v1"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase/repo/memoryrepo"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase/repo/postgresrepo"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/httpserver"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
 	"log"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/gin-gonic/gin"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
+	v1 "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/http/v1"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo/memoryrepo"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo/postgresrepo"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/grpcserver"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/httpserver"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
 )
 
 // Run creates objects via constructors.
 func Run(cfg *config.Config) {
-
 	// Logger
 	logg := logger.New(cfg.Logger.Level)
 
 	// EventRepo
-	r := repo(cfg)
+	var repo usecase.EventRepo
+	if cfg.Storage.Type == "postgres" {
+		pg, err := postgres.New(cfg)
+		if err != nil {
+			log.Fatal(fmt.Errorf("app - Run - repo - postgres.New: %w", err))
+		}
+		defer pg.Close()
+		repo = postgresrepo.New(pg)
+	} else {
+		repo = memoryrepo.New()
+	}
 
 	// Use case
-	eventUseCase := usecase.New(r)
+	eventUseCase := usecase.New(repo)
 
 	// HTTP Server
 	handler := gin.New()
 	v1.NewRouter(handler, logg, *eventUseCase)
 	httpServer := httpserver.New(handler, cfg.HTTP, logg)
+
+	// GRPC Server
+	lis, err := net.Listen("tcp", cfg.GRPC.Addr)
+	if err != nil {
+		logg.Fatal(fmt.Errorf("app - Run - net.Listen: %w", err))
+	}
+	defer func() {
+		if e := lis.Close(); e != nil {
+			logg.Fatal("...failed to close client, error: %v\n", e)
+		}
+	}()
+
+	grpcServer := grpcserver.New(lis, logg, eventUseCase)
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)
@@ -46,20 +71,10 @@ func Run(cfg *config.Config) {
 	}
 
 	// Shutdown
-	err := httpServer.Shutdown()
-	if err != nil {
+	errServer := httpServer.Shutdown()
+	if errServer != nil {
 		logg.Error(fmt.Errorf("app - Run - httpServer.Shutdown: %w", err))
 	}
-}
 
-func repo(cfg *config.Config) usecase.EventRepo {
-	if cfg.Storage.Type == "postgres" {
-		pg, err := postgres.New(cfg.Storage.Dsn)
-		if err != nil {
-			log.Fatal(fmt.Errorf("app - Run - repo - postgres.New: %w", err))
-		}
-		defer pg.Close()
-		return postgresrepo.New(pg)
-	}
-	return memoryrepo.New()
+	grpcServer.Shutdown()
 }

@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 
+	_ "github.com/lib/pq"
+
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/app"
 )
@@ -17,10 +19,10 @@ func init() {
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" {
-		printVersion()
-		return
-	}
+	//if flag.Arg(0) == "version" {
+	//	printVersion()
+	//	return
+	//}
 
 	// Configuration
 	cfg, err := config.NewConfig(configFile)

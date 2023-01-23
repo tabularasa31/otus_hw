@@ -1,7 +1,41 @@
 syntax = "proto3";
 
 package event;
+option go_package=".;proto";
 
 message Event {
-    // TODO
+  int64 id = 1;
+  string title = 2;
+  string desc = 3;
+  int64 user_id = 4;
+  string start = 5;
+  string end = 6;
+  string notification = 7;
+}
+
+message UID {
+  int64 uid = 1;
+}
+
+message Response {
+  string status = 1;
+}
+
+message GetEventsRequest {
+  int64 user_id = 1;
+  string start = 2;
+
+}
+
+message GetEventsResponse {
+  repeated Event events = 1;
+}
+
+service EventService{
+  rpc CreateEvent(Event) returns (Event);
+  rpc UpdateEvent(Event) returns (Event);
+  rpc DeleteEvent(UID) returns (Response);
+  rpc GetDailyEvents(GetEventsRequest) returns (GetEventsResponse);
+  rpc GetWeeklyEvents(GetEventsRequest) returns (GetEventsResponse);
+  rpc GetMonthlyEvents(GetEventsRequest) returns (GetEventsResponse);
 }
