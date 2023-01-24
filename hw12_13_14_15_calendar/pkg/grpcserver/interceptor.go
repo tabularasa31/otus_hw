@@ -2,9 +2,8 @@ package grpcserver
 
 import (
 	"context"
+	"go.uber.org/zap"
 	"time"
-
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -12,11 +11,11 @@ import (
 
 // InterceptorManager .
 type InterceptorManager struct {
-	logger logger.Logger
+	logger zap.SugaredLogger
 }
 
 // NewInterceptorManager - InterceptorManager constructor .
-func NewInterceptorManager(logger logger.Logger) *InterceptorManager {
+func NewInterceptorManager(logger zap.SugaredLogger) *InterceptorManager {
 	return &InterceptorManager{logger: logger}
 }
 

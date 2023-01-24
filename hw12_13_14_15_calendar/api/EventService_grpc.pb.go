@@ -28,6 +28,8 @@ type EventServiceClient interface {
 	GetDailyEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
 	GetWeeklyEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
 	GetMonthlyEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
+	GetNotificationEvents(ctx context.Context, in *Time, opts ...grpc.CallOption) (*GetEventsResponse, error)
+	DeleteOldEvents(ctx context.Context, in *Time, opts ...grpc.CallOption) (*Response, error)
 }
 
 type eventServiceClient struct {
@@ -92,6 +94,24 @@ func (c *eventServiceClient) GetMonthlyEvents(ctx context.Context, in *GetEvents
 	return out, nil
 }
 
+func (c *eventServiceClient) GetNotificationEvents(ctx context.Context, in *Time, opts ...grpc.CallOption) (*GetEventsResponse, error) {
+	out := new(GetEventsResponse)
+	err := c.cc.Invoke(ctx, "/event.EventService/GetNotificationEvents", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *eventServiceClient) DeleteOldEvents(ctx context.Context, in *Time, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/event.EventService/DeleteOldEvents", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EventServiceServer is the server API for EventService service.
 // All implementations must embed UnimplementedEventServiceServer
 // for forward compatibility
@@ -102,6 +122,8 @@ type EventServiceServer interface {
 	GetDailyEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
 	GetWeeklyEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
 	GetMonthlyEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
+	GetNotificationEvents(context.Context, *Time) (*GetEventsResponse, error)
+	DeleteOldEvents(context.Context, *Time) (*Response, error)
 	mustEmbedUnimplementedEventServiceServer()
 }
 
@@ -126,6 +148,12 @@ func (UnimplementedEventServiceServer) GetWeeklyEvents(context.Context, *GetEven
 }
 func (UnimplementedEventServiceServer) GetMonthlyEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMonthlyEvents not implemented")
+}
+func (UnimplementedEventServiceServer) GetNotificationEvents(context.Context, *Time) (*GetEventsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNotificationEvents not implemented")
+}
+func (UnimplementedEventServiceServer) DeleteOldEvents(context.Context, *Time) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteOldEvents not implemented")
 }
 func (UnimplementedEventServiceServer) mustEmbedUnimplementedEventServiceServer() {}
 
@@ -248,6 +276,42 @@ func _EventService_GetMonthlyEvents_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EventService_GetNotificationEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Time)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).GetNotificationEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/event.EventService/GetNotificationEvents",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).GetNotificationEvents(ctx, req.(*Time))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _EventService_DeleteOldEvents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Time)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).DeleteOldEvents(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/event.EventService/DeleteOldEvents",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).DeleteOldEvents(ctx, req.(*Time))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EventService_ServiceDesc is the grpc.ServiceDesc for EventService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -278,6 +342,14 @@ var EventService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMonthlyEvents",
 			Handler:    _EventService_GetMonthlyEvents_Handler,
+		},
+		{
+			MethodName: "GetNotificationEvents",
+			Handler:    _EventService_GetNotificationEvents_Handler,
+		},
+		{
+			MethodName: "DeleteOldEvents",
+			Handler:    _EventService_DeleteOldEvents_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

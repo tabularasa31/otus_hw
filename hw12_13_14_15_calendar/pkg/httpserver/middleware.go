@@ -2,16 +2,15 @@ package httpserver
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"net/http"
-
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 )
 
-func loggingMiddleware(h http.Handler, l logger.Logger) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		l.Info("before")
-		l.Info(fmt.Sprintf("%s %s\n", r.Method, r.URL.Path))
-		h.ServeHTTP(rw, r)
-		l.Info("after")
+func loggingMiddleware(h http.Handler, l *zap.SugaredLogger) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		l.Info("before: ")
+		l.Info(fmt.Sprintf("%s %s\n", r.UserAgent(), r.RequestURI, r.Method, r.URL.Path))
+		h.ServeHTTP(w, r)
+		l.Info("after: ")
 	})
 }

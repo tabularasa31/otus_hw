@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	gohit "github.com/Eun/go-hit"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/utils"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	// Attempts connection
 	host       = "localhost:8080"
 	healthPath = "http://" + host + "/healthz"
 	attempts   = 20
@@ -53,7 +52,7 @@ func healthCheck(attempts int) error {
 	return err
 }
 
-// HTTP POST: /event/create .
+// HTTP POST: /event/update .
 func TestHTTPUpdate(t *testing.T) {
 	date := time.Now()
 	event := entity.Event{
@@ -61,9 +60,9 @@ func TestHTTPUpdate(t *testing.T) {
 		Title:        "Test title",
 		Desc:         "Test description",
 		UserID:       42,
-		StartTime:    utils.TimeToString(date.Add(time.Hour)),
-		EndTime:      utils.TimeToString(date.Add(2 * time.Hour)),
-		Notification: utils.TimeToString(date),
+		StartTime:    dateconv.TimeToString(date.Add(time.Hour)),
+		EndTime:      dateconv.TimeToString(date.Add(2 * time.Hour)),
+		Notification: dateconv.TimeToString(date),
 	}
 
 	body, err := json.Marshal(event)

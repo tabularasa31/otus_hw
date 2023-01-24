@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/swaggo/swag/example/basic/docs"
@@ -9,17 +10,17 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 )
 
 // NewRouter -.
 // Swagger spec:
-// @title       Calendar API
-// @description Homework project
-// @version     1.0
-// @host        localhost:8080
-// @BasePath    /api/v1
-func NewRouter(handler *gin.Engine, logg logger.Interface, u usecase.EventUseCase) {
+//
+//	@title			Calendar API
+//	@description	Homework project
+//	@version		1.0
+//	@host			localhost:8080
+//	@BasePath		/api/v1
+func NewRouter(handler *gin.Engine, logg *zap.SugaredLogger, u usecase.EventUseCase) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())
@@ -35,7 +36,7 @@ func NewRouter(handler *gin.Engine, logg logger.Interface, u usecase.EventUseCas
 	// Routers
 	v1 := handler.Group("/api/v1")
 	{
-		newCalendarRoutes(v1, u, logg)
+		newCalendarRoutes(v1, u, *logg)
 	}
 
 	// Ping test

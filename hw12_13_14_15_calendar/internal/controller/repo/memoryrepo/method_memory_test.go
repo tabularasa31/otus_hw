@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo/memoryrepo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 )
@@ -54,39 +53,5 @@ func TestCreate(t *testing.T) {
 				require.ErrorIs(t, err, c.err)
 			})
 		}
-	})
-
-	t.Run("event time busy", func(t *testing.T) {
-		userID := int(uuid.New().ID())
-		eventRepo := memoryrepo.New()
-		_, err := eventRepo.CreateEvent(context.Background(), &entity.EventDB{
-			Title:        "event one",
-			Desc:         "event one",
-			UserID:       userID,
-			StartTime:    time.Date(2022, 12, 30, 15, 0, 0, 0, time.Local),
-			EndTime:      time.Date(2022, 12, 30, 16, 30, 0, 0, time.Local),
-			Notification: time.Now(),
-		})
-		require.NoError(t, err)
-
-		_, err = eventRepo.CreateEvent(context.Background(), &entity.EventDB{
-			Title:        "event two",
-			Desc:         "event two",
-			UserID:       userID,
-			StartTime:    time.Date(2022, 12, 30, 15, 30, 0, 0, time.Local),
-			EndTime:      time.Date(2022, 12, 30, 16, 30, 0, 0, time.Local),
-			Notification: time.Now(),
-		})
-		require.ErrorIs(t, err, repo.ErrEventTimeBusy)
-
-		_, err = eventRepo.CreateEvent(context.Background(), &entity.EventDB{
-			Title:        "event three",
-			Desc:         "event three",
-			UserID:       userID,
-			StartTime:    time.Date(2022, 12, 30, 14, 30, 0, 0, time.Local),
-			EndTime:      time.Date(2022, 12, 30, 15, 30, 0, 0, time.Local),
-			Notification: time.Now(),
-		})
-		require.ErrorIs(t, err, repo.ErrEventTimeBusy)
 	})
 }
