@@ -5,8 +5,6 @@ BIN_CALENDAR="./bin/calendar"
 BIN_SCHEDULER="./bin/scheduler"
 BIN_SENDER="./bin/sender"
 
-DOCKER_IMG="calendar:develop"
-
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
@@ -23,11 +21,16 @@ build:
 	go build -v -o $(BIN_SCHEDULER) -ldflags "$(LDFLAGS)" ./cmd/calendar_scheduler
 	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/calendar_sender
 
-
-run: build swag
+run_calendar:
 	$(BIN_CALENDAR) -config ./config/config.yml
+
+run_scheduler:
 	$(BIN_SCHEDULER) -config ./config/scheduler_config.yml
+
+run_sender:
 	$(BIN_SENDER) -config ./config/sender_config.yml
+
+run: build swag run_calendar run_scheduler run_sender
 
 test:
 	go test -cover -race ./internal/...
@@ -72,22 +75,25 @@ lint: install-lint-deps ### check by golangci linter
 migrate:
 	goose -dir migrations up
 
-
 # ==============================================================================
 # Docker compose commands
 
 
 # ==============================================================================
 # Docker support
+DOCKER_IMG="calendar:develop"
+
 build-img:
 	docker build \
 		--build-arg=LDFLAGS="$(LDFLAGS)" \
 		-t $(DOCKER_IMG) \
-		-f build/Dockerfile .
+		-f build/calendar/Dockerfile .
 .PHONY: build-img
+
 
 run-img: build-img
 	docker run $(DOCKER_IMG)
 
 
+# ==============================================================================
 .PHONY: build run build-img run-img test lint migrate
