@@ -77,6 +77,12 @@ migrate:
 
 # ==============================================================================
 # Docker compose commands
+up:
+	echo "Starting docker environment"
+	docker-compose -f docker-compose.yaml --project-name calendar_service up --build
+
+down:
+	docker-compose -f docker-compose.yaml --project-name calendar_service down
 
 
 # ==============================================================================

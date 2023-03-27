@@ -3,9 +3,9 @@ logger:
 storage:
   type: postgres
 http:
-  addr: 'localhost:8080'
+  addr: ':8080'
 grpc:
-  addr: 'localhost:50051'
+  addr: ':50051'
 postgres:
-  dsn: 'postgres://postgres:passpass@localhost:5432/calendarDB'
+  dsn: 'postgres://postgres:passpass@postgres:5432/postgres?sslmode=disable'
   pool_max: 2

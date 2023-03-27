@@ -7,7 +7,7 @@ RUN go mod download
 # Step 2: Tests
 FROM golang:1.17.1-alpine3.14
 COPY --from=modules /go/pkg /go/pkg
-COPY . /app
+COPY ../../tests /app
 WORKDIR /app
 
 RUN go env -w CGO_ENABLED=0

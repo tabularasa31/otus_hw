@@ -15,7 +15,7 @@ RUN CGO_ENABLED=0 go build \
         -ldflags "$LDFLAGS" \
         -o /bin/app ./cmd/calendar/*
 
-# Step 2: Final
+# Step 3: Final
 FROM scratch
 
 LABEL service="Calendar"
@@ -25,4 +25,6 @@ LABEL mainteiner="tabularasa31@gmail.com"
 COPY --from=builder /app/config /config
 COPY --from=builder /bin/app /app
 
+EXPOSE 50051
+EXPOSE 8080
 CMD ["/app"]
