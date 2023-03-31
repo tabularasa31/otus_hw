@@ -74,7 +74,7 @@ jobs:
 
       - name: make lint
         uses: golangci/golangci-lint-action@v3
-        run: make lint
+#        run: make lint
         working-directory: hw12_13_14_15_calendar
 
       - name: make build
