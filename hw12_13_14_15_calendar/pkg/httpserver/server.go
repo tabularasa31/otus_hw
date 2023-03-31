@@ -2,11 +2,11 @@ package httpserver
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
 
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
+	"go.uber.org/zap"
 )
 
 const (

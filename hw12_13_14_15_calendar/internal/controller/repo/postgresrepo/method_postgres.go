@@ -105,7 +105,6 @@ func (r *EventRepo) GetEventsByDates(ctx context.Context, uid int, startDate tim
 			return events, fmt.Errorf("postgres - GetDailyEvents - rows.Scan: %w", er)
 		}
 		events = append(events, *eventDB.Dto())
-
 	}
 	return events, nil
 }
@@ -135,7 +134,6 @@ func (r *EventRepo) GetAllEventsByTime(ctx context.Context, start time.Time) ([]
 			return events, fmt.Errorf("postgres - GetAllEventsByTime - rows.Scan: %w", er)
 		}
 		events = append(events, *eventDB.Dto())
-
 	}
 	return events, nil
 }

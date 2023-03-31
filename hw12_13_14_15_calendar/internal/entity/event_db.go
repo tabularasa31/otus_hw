@@ -1,8 +1,9 @@
 package entity
 
 import (
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
 	"time"
+
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
 )
 
 type (

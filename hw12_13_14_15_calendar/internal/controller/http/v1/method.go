@@ -1,8 +1,6 @@
 package v1
 
 import (
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
-	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 	"time"
@@ -10,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
+	"go.uber.org/zap"
 )
 
 type calendarRoutes struct {

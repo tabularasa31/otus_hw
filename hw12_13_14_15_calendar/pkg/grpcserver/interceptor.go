@@ -2,6 +2,7 @@ package grpcserver
 
 import (
 	"context"
+
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -18,7 +19,9 @@ func NewInterceptorManager(logger zap.SugaredLogger) *InterceptorManager {
 }
 
 // Logger Interceptor .
-func (im *InterceptorManager) Logger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (resp interface{}, err error) {
+func (im *InterceptorManager) Logger(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (resp interface{}, err error) {
 	md, _ := metadata.FromIncomingContext(ctx)
 	reply, err := handler(ctx, req)
 	im.logger.Infof("Server: %v Method: %s, Metadata: %v, Err: %v", info.Server, info.FullMethod, md, err)

@@ -7,6 +7,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
+	"testing"
+	"time"
+
 	gohit "github.com/Eun/go-hit"
 	"github.com/stretchr/testify/suite"
 	proto "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/api"
@@ -16,11 +22,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
-	"log"
-	"net/http"
-	"os"
-	"testing"
-	"time"
 )
 
 const (

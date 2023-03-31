@@ -1,11 +1,11 @@
 scheduler:
-  delete_period: 525600 # delete events happened 60 * 24 * 365 minutes ago (1 year)
+  deletePeriod: 525600 # delete events happened 60 * 24 * 365 minutes ago (1 year)
 rabbitmq:
   addr: "amqp://guest:guest@rabbitmq/"
   exchange: calendar
-  exchange_type: direct
+  exchangeType: direct
   queue: notifications
-  consumer_tag: calendar-consumer
-  binding_key: calendar-key
+  consumerTag: calendar-consumer
+  bindingKey: calendar-key
   reliable: true
   persistent: true

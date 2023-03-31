@@ -8,4 +8,4 @@ grpc:
   addr: ':50051'
 postgres:
   dsn: 'postgres://postgres:passpass@postgres:5432/postgres?sslmode=disable'
-  pool_max: 2
+  poolMax: 2

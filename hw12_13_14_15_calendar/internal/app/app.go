@@ -1,7 +1,6 @@
 package app
 
 import (
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 	"log"
 	"net"
 	"os"
@@ -16,6 +15,7 @@ import (
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/grpcserver"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/httpserver"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/logger"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/storage/postgres"
 )
 

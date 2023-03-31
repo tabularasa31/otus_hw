@@ -2,9 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"log"
+
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/rabbitmq"
-	"log"
 )
 
 var configFile string
@@ -19,16 +21,24 @@ func main() {
 	// Configuration
 	cfg, err := config.NewSenderConfig(configFile)
 	failOnError(err, "sender config error")
-	_ = cfg
 
 	// AMPQ consumer
 	mqConn, ch, err := rabbitmq.NewRabbitMQConn(&cfg.AMQPConfig)
+	failOnError(err, "...failed to make connection")
 
 	// Close Channel
-	defer ch.Close()
+	defer func() {
+		if e := ch.Close(); e != nil {
+			failOnError(err, fmt.Sprintf("...failed to close channel, error: %v\n", e))
+		}
+	}()
 
 	// Close Connection
-	defer mqConn.Close()
+	defer func() {
+		if e := mqConn.Close(); e != nil {
+			failOnError(err, fmt.Sprintf("...failed to close connection, error: %v\n", e))
+		}
+	}()
 
 	q, err := ch.QueueDeclare(
 		cfg.Queue, // name
@@ -64,7 +74,7 @@ func main() {
 
 	go func() {
 		for d := range msgs {
-			log.Printf(" [x] Recieved: %s", d.Body)
+			log.Printf(" [x] Received: %s", d.Body)
 		}
 	}()
 

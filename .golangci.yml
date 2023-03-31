@@ -1,10 +1,14 @@
 run:
   tests: true
   build-tags:
-    - bench
-    - !bench
+    - "bench"
+    - "!bench"
 
 linters-settings:
+  lll:
+    line-length: 160
+  godot:
+    period: false
   funlen:
     lines: 150
     statements: 80
