@@ -1,8 +1,8 @@
 run:
   tests: true
   build-tags:
-    - "bench"
-    - "!bench"
+    - bench
+    - !bench
 
 linters-settings:
   lll:
