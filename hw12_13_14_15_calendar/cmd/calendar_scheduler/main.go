@@ -49,7 +49,7 @@ func main() {
 	defer cancel()
 
 	// GRPC client
-	conn, err := grpc.Dial(":50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("calendar:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	failOnError(err, "failed to connect grpc server")
 	defer conn.Close()
 

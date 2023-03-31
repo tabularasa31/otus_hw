@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
 )
@@ -46,15 +45,22 @@ func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l zap.S
 func (r *calendarRoutes) create(c *gin.Context) {
 	var req entity.Event
 	if err := c.ShouldBindJSON(&req); err != nil {
-		r.l.Error(err, "http - v1 - create")
+		r.l.Error(err, " -- http - v1 - create")
 		errorResponse(c, http.StatusBadRequest, "invalid request body")
+		return
+	}
 
+	if req.UserID == 0 {
+		errorResponse(c, http.StatusBadRequest, "empty event user id")
+		return
+	} else if req.StartTime == "" || req.EndTime == "" {
+		errorResponse(c, http.StatusBadRequest, "empty event time")
 		return
 	}
 
 	result, err := r.u.Create(
 		c.Request.Context(),
-		entity.Event{
+		&entity.Event{
 			Title:        req.Title,
 			Desc:         req.Desc,
 			UserID:       req.UserID,
@@ -64,13 +70,8 @@ func (r *calendarRoutes) create(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		if err == errapp.ErrEventTimeBusy {
-			r.l.Error("http - v1 - create - ErrEventTimeBusy")
-			errorResponse(c, http.StatusUnprocessableEntity, "this event time is already busy")
-		} else {
-			r.l.Error(err, "http - v1 - create")
-			errorResponse(c, http.StatusInternalServerError, "event creating problems")
-		}
+		r.l.Error(err, " -- http - v1 - create")
+		errorResponse(c, http.StatusInternalServerError, "event creating problems")
 		return
 	}
 
@@ -93,7 +94,6 @@ func (r *calendarRoutes) update(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error(err, "http - v1 - update")
 		errorResponse(c, http.StatusBadRequest, "invalid request body")
-
 		return
 	}
 
@@ -110,13 +110,8 @@ func (r *calendarRoutes) update(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		if err == errapp.ErrEventTimeBusy {
-			r.l.Error("http - v1 - update - ErrEventTimeBusy")
-			errorResponse(c, http.StatusUnprocessableEntity, "this event time is already busy")
-		} else {
-			r.l.Error(err, "http - v1 - update")
-			errorResponse(c, http.StatusInternalServerError, "event updating problems")
-		}
+		r.l.Error(err, "http - v1 - update")
+		errorResponse(c, http.StatusInternalServerError, "event updating problems")
 		return
 	}
 
