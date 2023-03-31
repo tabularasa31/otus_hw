@@ -1,17 +1,17 @@
-# Step 1: Modules caching
-FROM golang:1.17.1-alpine3.14 as modules
-COPY go.mod go.sum /modules/
-WORKDIR /modules
-RUN go mod download
+FROM golang:1.17-alpine
 
-# Step 2: Tests
-FROM golang:1.17.1-alpine3.14
-COPY --from=modules /go/pkg /go/pkg
-COPY ../../tests /app
-WORKDIR /app
+RUN mkdir -p /opt/integration_tests
+WORKDIR /opt/integration_tests
+
+COPY go.mod .
+COPY go.sum .
+RUN go mod download
 
 RUN go env -w CGO_ENABLED=0
 RUN go env -w GOOS=linux
 RUN go env -w GOARCH=amd64
 
-CMD ["go", "test", "-v", "./integration_test/..."]
+COPY . .
+
+CMD ["go", "test", "-v", "-tags", "integration", "./tests/."]
+

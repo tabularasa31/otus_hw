@@ -23,6 +23,9 @@ services:
 
   migrate:
     container_name: migrate
+    environment:
+      GOOSE_DRIVER: "postgres"
+      GOOSE_DBSTRING: "postgres://postgres:passpass@postgres:5432/postgres?sslmode=disable"
     build:
       context: .
       dockerfile: build/migrations/Dockerfile
@@ -95,10 +98,8 @@ services:
       dockerfile: build/tests/Dockerfile
     environment:
       GRPC_ADDR: "calendar:50051"
-    command: "go test -tags integration ./tests/integration/..."
     depends_on:
-      calendar:
-        condition: service_completed_successfully
+      - calendar
     networks:
       - default
 

@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package integration_test
 
 import (
@@ -21,7 +24,7 @@ import (
 )
 
 const (
-	host       = "localhost:8080"
+	host       = "calendar:8080"
 	healthPath = "http://" + host + "/healthz"
 	attempts   = 20
 
