@@ -2,7 +2,7 @@ sender:
 rabbitmq:
   addr: "amqp://guest:guest@rabbitmq/"
   exchange: calendar
-  exchangeTypee: direct
+  exchangeType: direct
   queue: notifications
   consumerTag: calendar-consumer
   bindingKey: calendar-key
