@@ -74,6 +74,9 @@ jobs:
 
       - name: make lint
         run: make lint
+        with:
+          version: latest
+          args: --timeout 3m --verbose
         working-directory: hw12_13_14_15_calendar
 
       - name: make build
