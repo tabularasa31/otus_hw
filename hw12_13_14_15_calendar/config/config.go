@@ -33,7 +33,7 @@ type (
 	}
 
 	Postgres struct {
-		Dsn     string `yaml:"dsn"`
+		Dsn     string `yaml:"dsn" env:"DSN"`
 		PoolMax int    `yaml:"poolMax" env:"PG_POOL_MAX"`
 	}
 

@@ -1,6 +1,3 @@
-//go:build integration
-// +build integration
-
 package integration_test
 
 import (
@@ -25,16 +22,22 @@ import (
 )
 
 const (
-	host       = "calendar:8080"
-	healthPath = "http://" + host + "/healthz"
-	attempts   = 20
-
-	// HTTP REST
-	basePath = "http://" + host + "/api/v1"
+	attempts = 5
 )
 
+func getHost() string {
+	host := os.Getenv("HTTP_ADDR")
+	if host == "" {
+		host = "localhost:8080"
+	}
+	return host
+}
+
 func TestMain(m *testing.M) {
-	err := healthCheck(attempts)
+	host := getHost()
+	healthPath := "http://" + host + "/healthz"
+
+	err := healthCheck(healthPath, attempts)
 	if err != nil {
 		log.Fatalf("Integration tests: host %s is not available: %s", host, err)
 	}
@@ -45,7 +48,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func healthCheck(attempts int) error {
+func healthCheck(healthPath string, attempts int) error {
 	var err error
 
 	for attempts > 0 {
@@ -66,6 +69,9 @@ func healthCheck(attempts int) error {
 
 // HTTP testing
 func TestHTTP(t *testing.T) {
+	host := getHost()
+	basePath := "http://" + host + "/api/v1"
+
 	date := time.Now()
 	event := entity.Event{
 		Title:        "Test title",
@@ -89,7 +95,7 @@ func TestHTTP(t *testing.T) {
 		gohit.Expect().Status().Equal(http.StatusCreated),
 		gohit.Expect().Body().JSON().JQ(".title").Equal("Test title"),
 		gohit.Expect().Body().JSON().JQ(".desc").Equal("Test description"),
-		gohit.Expect().Body().JSON().JQ(".user_id").Equal("42.000000"),
+		gohit.Expect().Body().JSON().JQ(".userId").Equal("42.000000"),
 	)
 
 	start := date.Format("2006-01-02")
@@ -97,7 +103,7 @@ func TestHTTP(t *testing.T) {
 		gohit.Description("Get Daily Events"),
 		gohit.Get(basePath+"/event/daily?uid=42&date="+start),
 		gohit.Expect().Status().Equal(http.StatusOK),
-		gohit.Expect().Body().JSON().JQ(".events[0].user_id").Equal("42.000000"),
+		gohit.Expect().Body().JSON().JQ(".events[0].userId").Equal("42.000000"),
 	)
 }
 

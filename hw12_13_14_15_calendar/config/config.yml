@@ -1,5 +1,5 @@
 logger:
-  level: INFO
+  level: 'info'  #("debug", "info", "warn", "error", "dpanic", "panic", "fatal")
 storage:
   type: postgres
 http:
@@ -7,5 +7,5 @@ http:
 grpc:
   addr: ':50051'
 postgres:
-  dsn: 'postgres://postgres:passpass@postgres:5432/postgres?sslmode=disable'
+  dsn: 'postgres://postgres:passpass@localhost:5432/postgres?sslmode=disable'
   poolMax: 2

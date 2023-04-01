@@ -1,5 +1,5 @@
-include .env.example
-export
+#include .env.example
+#export
 
 BIN_CALENDAR="./bin/calendar"
 BIN_SCHEDULER="./bin/scheduler"
@@ -22,7 +22,7 @@ build:
 	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/calendar_sender
 
 run_calendar:
-	$(BIN_CALENDAR) -config ./config/config.yml
+	$(BIN_CALENDAR) -config ./config/config_local.yml
 
 run_scheduler:
 	$(BIN_SCHEDULER) -config ./config/scheduler_config.yml
@@ -35,8 +35,8 @@ run: build swag run_calendar run_scheduler run_sender
 test:
 	go test -cover -race ./internal/...
 
-integration-test: ### run integration-test
-	go clean -testcache && go test -v ./integration-test/...
+integration-test:
+	go clean -testcache && go test -v -tags integration ./tests/...
 
 # ==============================================================================
 # Modules support
@@ -79,7 +79,7 @@ migrate:
 # Docker compose commands
 up:
 	echo "Starting docker environment"
-	docker-compose -f docker-compose.yaml --project-name calendar_service up --build
+	docker-compose -f docker-compose.yaml --env-file .env.example --project-name calendar_service up --build
 
 down:
 	docker-compose -f docker-compose.yaml --project-name calendar_service down
@@ -102,4 +102,4 @@ run-img: build-img
 
 
 # ==============================================================================
-.PHONY: build run build-img run-img test lint migrate
+.PHONY: build run build-img run-img test lint migrate integration-test
