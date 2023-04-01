@@ -67,7 +67,7 @@ install-lint-deps:
 
 lint: install-lint-deps ### check by golangci linter
 	echo "Starting linters"
-	golangci-lint run
+	golangci-lint run --timeout 5m --verbose
 
 # ==============================================================================
 # Go migrate postgresql
