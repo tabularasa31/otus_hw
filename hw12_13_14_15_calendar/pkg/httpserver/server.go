@@ -44,7 +44,6 @@ func New(handler http.Handler, conf config.HTTP, logg *zap.SugaredLogger) *Serve
 func (s *Server) Start() {
 	go func() {
 		s.notify <- s.server.ListenAndServe()
-		//s.notify <- http.ListenAndServe(s.server.Addr, loggingMiddleware(s.server.Handler, &s.logger))
 		close(s.notify)
 	}()
 }
