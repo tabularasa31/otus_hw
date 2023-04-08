@@ -87,8 +87,8 @@ func (u *EventUseCase) Update(ctx context.Context, event entity.Event) (*entity.
 	return res, nil
 }
 
-func (u *EventUseCase) Delete(ctx context.Context, userID int) error {
-	err := u.repo.DeleteEvent(ctx, userID)
+func (u *EventUseCase) Delete(ctx context.Context, id int) error {
+	err := u.repo.DeleteEvent(ctx, id)
 	if err != nil {
 		return fmt.Errorf("EventUseCase - DeleteEvent - u.repo.DeleteEvent: %w", err)
 	}
@@ -115,6 +115,14 @@ func (u *EventUseCase) DeleteOldEvents(ctx context.Context, date time.Time) erro
 	err := u.repo.DeleteOldEventsFromRepo(ctx, date)
 	if err != nil {
 		return fmt.Errorf("EventUseCase - DeleteOldEvents - u.repo.DeleteOldEventsFromRepo: %w", err)
+	}
+	return nil
+}
+
+func (u *EventUseCase) DeleteByUID(ctx context.Context, uid int) error {
+	err := u.repo.DeleteEventsByUserID(ctx, uid)
+	if err != nil {
+		return fmt.Errorf("EventUseCase - DeleteByUID - u.repo.DeleteByUID: %w", err)
 	}
 	return nil
 }

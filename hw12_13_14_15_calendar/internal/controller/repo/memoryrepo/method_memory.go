@@ -133,3 +133,19 @@ func (r *EventRepo) DeleteOldEventsFromRepo(_ context.Context, date time.Time) e
 	}
 	return errapp.ErrEventNotFound
 }
+
+// DeleteEventsByUserID Удалить (UID user id).
+func (r *EventRepo) DeleteEventsByUserID(_ context.Context, uid int) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for _, userEvents := range r.events {
+		for _, event := range userEvents {
+			if event.UserID == uid {
+				delete(r.events, event.UserID)
+				return nil
+			}
+		}
+	}
+	return errapp.ErrEventNotFound
+}

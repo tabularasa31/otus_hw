@@ -25,7 +25,7 @@ func NewCalendarGRPCService(u usecase.EventUseCase, l zap.SugaredLogger) *Calend
 
 func (g *CalendarGRPCService) CreateEvent(ctx context.Context, req *proto.Event) (*proto.Event, error) {
 	if req.GetUserId() == 0 {
-		return &proto.Event{}, status.Errorf(codes.InvalidArgument, "empty event user id")
+		return &proto.Event{}, status.Errorf(codes.InvalidArgument, "empty user id")
 	} else if req.GetStart() == "" || req.GetEnd() == "" {
 		return &proto.Event{}, status.Errorf(codes.InvalidArgument, "empty event time")
 	}
@@ -58,6 +58,10 @@ func (g *CalendarGRPCService) CreateEvent(ctx context.Context, req *proto.Event)
 }
 
 func (g *CalendarGRPCService) UpdateEvent(ctx context.Context, req *proto.Event) (*proto.Event, error) {
+	if req.GetUserId() == 0 {
+		return &proto.Event{}, status.Errorf(codes.InvalidArgument, "empty user id")
+	}
+
 	result, err := g.u.Update(
 		ctx,
 		entity.Event{
@@ -86,8 +90,8 @@ func (g *CalendarGRPCService) UpdateEvent(ctx context.Context, req *proto.Event)
 	}, nil
 }
 
-func (g *CalendarGRPCService) DeleteEvent(ctx context.Context, uid *proto.UID) (*proto.Response, error) {
-	err := g.u.Delete(ctx, int(uid.GetUid()))
+func (g *CalendarGRPCService) DeleteEvent(ctx context.Context, id *proto.ID) (*proto.Response, error) {
+	err := g.u.Delete(ctx, int(id.GetId()))
 	if err != nil {
 		g.l.Error(err, "grpc - v1 - DeleteEvent")
 		return &proto.Response{Status: "event deleting problems"}, status.Errorf(codes.Internal, "event deleting problems")
@@ -95,9 +99,7 @@ func (g *CalendarGRPCService) DeleteEvent(ctx context.Context, uid *proto.UID) (
 	return &proto.Response{Status: "OK"}, nil
 }
 
-func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context,
-	in *proto.GetEventsRequest,
-) (*proto.GetEventsResponse, error) {
+func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
 	start, err := dateconv.StringToDay(in.GetStart())
 	if err != nil {
@@ -127,9 +129,7 @@ func (g *CalendarGRPCService) GetDailyEvents(ctx context.Context,
 	return &proto.GetEventsResponse{Events: events}, nil
 }
 
-func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context,
-	in *proto.GetEventsRequest,
-) (*proto.GetEventsResponse, error) {
+func (g *CalendarGRPCService) GetWeeklyEvents(ctx context.Context, in *proto.GetEventsRequest) (*proto.GetEventsResponse, error) {
 	uid := int(in.GetUserId())
 	start, err := dateconv.StringToDay(in.GetStart())
 	if err != nil {
@@ -189,9 +189,7 @@ func (g *CalendarGRPCService) GetMonthlyEvents(ctx context.Context, in *proto.Ge
 	return &proto.GetEventsResponse{Events: events}, nil
 }
 
-func (g *CalendarGRPCService) GetNotificationEvents(ctx context.Context,
-	in *proto.Time,
-) (*proto.GetEventsResponse, error) {
+func (g *CalendarGRPCService) GetNotificationEvents(ctx context.Context, in *proto.Time) (*proto.GetEventsResponse, error) {
 	start, err := dateconv.StringToTime(in.GetStart())
 	if err != nil {
 		return &proto.GetEventsResponse{}, status.Errorf(codes.InvalidArgument, "bad event date")
@@ -232,6 +230,15 @@ func (g *CalendarGRPCService) DeleteOldEvents(ctx context.Context, in *proto.Tim
 				Status: "old events deleting problems",
 			},
 			status.Errorf(codes.Internal, "old events deleting problems")
+	}
+	return &proto.Response{Status: "OK"}, nil
+}
+
+func (g *CalendarGRPCService) DeleteByUserID(ctx context.Context, uid *proto.UID) (*proto.Response, error) {
+	err := g.u.DeleteByUID(ctx, int(uid.GetUid()))
+	if err != nil {
+		g.l.Error(err, "grpc - v1 - DeleteByUserID")
+		return &proto.Response{Status: "event deleting by uid problems"}, status.Errorf(codes.Internal, "event deleting by uid problems")
 	}
 	return &proto.Response{Status: "OK"}, nil
 }

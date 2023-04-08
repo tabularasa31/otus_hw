@@ -165,3 +165,9 @@ func (r *EventRepo) result(ctx context.Context, id int) (*entity.Event, error) {
 
 	return res.Dto(), nil
 }
+
+// DeleteEventsByUserID Удалить (UID user id).
+func (r *EventRepo) DeleteEventsByUserID(ctx context.Context, uid int) error {
+	_, err := r.Postgres.Pool.Exec(ctx, `delete from events where user_id = $1`, uid)
+	return err
+}

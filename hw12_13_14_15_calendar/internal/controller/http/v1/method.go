@@ -29,6 +29,7 @@ func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l zap.S
 		h.GET("/daily", r.daily)
 		h.GET("/weekly", r.weekly)
 		h.GET("/monthly", r.monthly)
+		h.DELETE("/deletebyuid/:uid", r.deletebyuid)
 	}
 }
 
@@ -275,4 +276,32 @@ func (r *calendarRoutes) monthly(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, eventsResponse{result})
+}
+
+// @Summary		Delete by uid
+// @Description	Delete events by user_id
+// @ID				deletebyuid
+// @Tags			event
+// @Accept			plain
+// @Produce		plain
+// @Success		200	{string}	string	"Deleted Success"
+// @Failure		400	{object}	response
+// @Failure		500	{object}	response
+// @Router			/event/delete [delete]
+func (r *calendarRoutes) deletebyuid(c *gin.Context) {
+	param := c.Param("uid")
+	uid, e := strconv.Atoi(param)
+	if e != nil {
+		errorResponse(c, http.StatusBadRequest, "param user ID not int")
+	}
+
+	err := r.u.DeleteByUID(c.Request.Context(), uid)
+	if err != nil {
+		r.l.Error(err, "http - v1 - deletebyuid")
+		errorResponse(c, http.StatusInternalServerError, "event deleting by uid problems")
+
+		return
+	}
+
+	c.String(http.StatusOK, "Deleted Success")
 }
