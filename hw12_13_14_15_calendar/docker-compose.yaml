@@ -1,0 +1,111 @@
+version: "3.9"
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d ${POSTGRES_DB} -U ${POSTGRES_USER}" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    networks:
+      - default
+
+  migrate:
+    container_name: migrate
+    environment:
+      GOOSE_DRIVER: "postgres"
+      GOOSE_DBSTRING: ${DSN}
+    build:
+      context: .
+      dockerfile: build/migrations/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - default
+
+  rabbitmq:
+    image: rabbitmq:3.11-alpine
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 5s
+      timeout: 20s
+      retries: 5
+    restart: on-failure
+    networks:
+      - default
+
+  calendar:
+    container_name: calendar
+    build:
+      context: .
+      dockerfile: build/calendar/Dockerfile
+    environment:
+      DSN: ${DSN}
+    ports:
+      - '8080:8080'
+      - '50051:50051'
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - default
+
+  scheduler:
+    container_name: scheduler
+    build:
+      context: .
+      dockerfile: build/calendar_scheduler/Dockerfile
+    environment:
+      GRPC_ADDR: ${GRPC_ADDR}
+    depends_on:
+      calendar:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - default
+
+  sender:
+    container_name: sender
+    build:
+      context: .
+      dockerfile: build/calendar_sender/Dockerfile
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - default
+
+  integration_tests:
+    build:
+      context: .
+      dockerfile: build/tests/Dockerfile
+    environment:
+      HTTP_ADDR: ${HTTP_ADDR}
+      GRPC_ADDR: ${GRPC_ADDR}
+    depends_on:
+      - calendar
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge

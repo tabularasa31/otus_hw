@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
+	"strconv"
+	"time"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 	proto "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/api"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/pkg/rabbitmq"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"log"
-	"strconv"
-	"time"
 )
 
 type Notification struct {
@@ -38,21 +39,33 @@ func main() {
 
 	// AMQP
 	mqConn, ch, err := rabbitmq.NewRabbitMQConn(&cfg.AMQPConfig)
+	failOnError(err, "...failed to make connection")
 
 	// Close Channel
-	defer ch.Close()
+	defer func() {
+		if e := ch.Close(); e != nil {
+			failOnError(err, fmt.Sprintf("...failed to close amqp channel, error: %v\n", e))
+		}
+	}()
 
 	// Close Connection
-	defer mqConn.Close()
+	defer func() {
+		if e := mqConn.Close(); e != nil {
+			failOnError(err, fmt.Sprintf("...failed to close amqp connection, error: %v\n", e))
+		}
+	}()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// GRPC client
-	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("calendar:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	failOnError(err, "failed to connect grpc server")
-	defer conn.Close()
-
+	defer func() {
+		if e := conn.Close(); e != nil {
+			failOnError(err, fmt.Sprintf("...failed to close grpc connection, error: %v\n", e))
+		}
+	}()
 	client := proto.NewEventServiceClient(conn)
 
 	// Delete old events Scheduler
@@ -61,7 +74,7 @@ func main() {
 		if e != nil {
 			fmt.Printf("...error while deleting old events: %v\n", e)
 		} else {
-			fmt.Printf("old events deleted successfuly: %s\n", res)
+			fmt.Printf("old events deleted successfully: %s\n", res)
 		}
 		time.Sleep(24 * time.Hour)
 	}()
@@ -102,7 +115,6 @@ func main() {
 		}
 		time.Sleep(time.Second)
 	}
-
 }
 
 // checkEventsNotifications get events by date notification
@@ -112,7 +124,7 @@ func checkEventsNotifications(c proto.EventServiceClient) (*proto.GetEventsRespo
 
 	res, err := c.GetNotificationEvents(context.Background(), req)
 	if err != nil {
-		return nil, fmt.Errorf("...error while calling GetNotificationEvents RPC: %v", err)
+		return nil, fmt.Errorf("...error while calling GetNotificationEvents RPC: %w", err)
 	}
 	return res, nil
 }
@@ -124,7 +136,7 @@ func deleteOldEvents(c proto.EventServiceClient) (string, error) {
 
 	res, err := c.DeleteOldEvents(context.Background(), req)
 	if err != nil {
-		return "", fmt.Errorf("...error while calling DeleteOldEvents RPC: %v", err)
+		return "", fmt.Errorf("...error while calling DeleteOldEvents RPC: %w", err)
 	}
 	return res.String(), nil
 }

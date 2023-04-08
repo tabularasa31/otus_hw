@@ -13,8 +13,12 @@ message Event {
   string notification = 7;
 }
 
+message ID {
+  int64 id = 1;
+}
+
 message UID {
-  int64 uid = 1;
+  int64 Uid = 1;
 }
 
 message Response {
@@ -38,10 +42,11 @@ message Time {
 service EventService{
   rpc CreateEvent(Event) returns (Event);
   rpc UpdateEvent(Event) returns (Event);
-  rpc DeleteEvent(UID) returns (Response);
+  rpc DeleteEvent(ID) returns (Response);
   rpc GetDailyEvents(GetEventsRequest) returns (GetEventsResponse);
   rpc GetWeeklyEvents(GetEventsRequest) returns (GetEventsResponse);
   rpc GetMonthlyEvents(GetEventsRequest) returns (GetEventsResponse);
   rpc GetNotificationEvents(Time) returns (GetEventsResponse);
   rpc DeleteOldEvents(Time) returns (Response);
+  rpc DeleteByUserID(UID) returns (Response);
 }

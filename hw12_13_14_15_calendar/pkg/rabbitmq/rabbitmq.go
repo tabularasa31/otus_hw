@@ -1,9 +1,10 @@
 package rabbitmq
 
 import (
+	"log"
+
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
-	"log"
 )
 
 // Initialize new RabbitMQ connection

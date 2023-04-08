@@ -2,27 +2,36 @@ package integration_test
 
 import (
 	"encoding/json"
+	"log"
+	"math/rand"
+	"net/http"
+	"os"
+	"strconv"
+	"testing"
+	"time"
+
 	gohit "github.com/Eun/go-hit"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
-	"log"
-	"net/http"
-	"os"
-	"testing"
-	"time"
 )
 
 const (
-	host       = "localhost:8080"
-	healthPath = "http://" + host + "/healthz"
-	attempts   = 20
-
-	// HTTP REST
-	basePath = "http://" + host + "/api/v1"
+	attempts = 5
 )
 
+func getHost() string {
+	host := os.Getenv("HTTP_ADDR")
+	if host == "" {
+		host = "localhost:8080"
+	}
+	return host
+}
+
 func TestMain(m *testing.M) {
-	err := healthCheck(attempts)
+	host := getHost()
+	healthPath := "http://" + host + "/healthz"
+
+	err := healthCheck(healthPath, attempts)
 	if err != nil {
 		log.Fatalf("Integration tests: host %s is not available: %s", host, err)
 	}
@@ -33,7 +42,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func healthCheck(attempts int) error {
+func healthCheck(healthPath string, attempts int) error {
 	var err error
 
 	for attempts > 0 {
@@ -52,14 +61,18 @@ func healthCheck(attempts int) error {
 	return err
 }
 
-// HTTP POST: /event/update .
-func TestHTTPUpdate(t *testing.T) {
+// HTTP testing
+func TestHTTP(t *testing.T) {
+	host := getHost()
+	basePath := "http://" + host + "/api/v1"
+
 	date := time.Now()
+	uid := rand.Intn(100)
+
 	event := entity.Event{
-		ID:           7,
 		Title:        "Test title",
 		Desc:         "Test description",
-		UserID:       42,
+		UserID:       uid,
 		StartTime:    dateconv.TimeToString(date.Add(time.Hour)),
 		EndTime:      dateconv.TimeToString(date.Add(2 * time.Hour)),
 		Notification: dateconv.TimeToString(date),
@@ -71,26 +84,27 @@ func TestHTTPUpdate(t *testing.T) {
 	}
 
 	gohit.Test(t,
-		gohit.Description("Update Event Success"),
-		gohit.Post(basePath+"/event/update"),
+		gohit.Description("Create Event Success"),
+		gohit.Post(basePath+"/event/create"),
 		gohit.Send().Headers("Content-Type").Add("application/json"),
 		gohit.Send().Body().Bytes(body),
-		gohit.Expect().Status().Equal(http.StatusOK),
-		gohit.Expect().Body().JSON().JQ(".id").Equal("7.000000"),
+		gohit.Expect().Status().Equal(http.StatusCreated),
 		gohit.Expect().Body().JSON().JQ(".title").Equal("Test title"),
 		gohit.Expect().Body().JSON().JQ(".desc").Equal("Test description"),
-		gohit.Expect().Body().JSON().JQ(".user_id").Equal("42.000000"),
+		gohit.Expect().Body().JSON().JQ(".userId").Equal(uid),
 	)
-}
 
-// HTTP GET: /event/daily .
-func TestHTTPDaily(t *testing.T) {
-	date := time.Now()
 	start := date.Format("2006-01-02")
+	u := strconv.Itoa(uid)
 	gohit.Test(t,
 		gohit.Description("Get Daily Events"),
-		gohit.Get(basePath+"/event/daily?uid=42&date="+start),
+		gohit.Get(basePath+"/event/daily?uid="+u+"&date="+start),
 		gohit.Expect().Status().Equal(http.StatusOK),
-		gohit.Expect().Body().JSON().JQ(".events[0].id").Equal("7.000000"),
+		gohit.Expect().Body().JSON().JQ(".events[0].userId").Equal(uid),
+	)
+
+	gohit.Test(t,
+		gohit.Delete(basePath+"/event/deletebyuid/"+u),
+		gohit.Expect().Status().Equal(http.StatusOK),
 	)
 }

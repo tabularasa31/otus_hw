@@ -2,6 +2,7 @@ package logger
 
 import (
 	"os"
+	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -16,7 +17,11 @@ func New(level string) *zap.SugaredLogger {
 	}
 
 	writerSyncer := zapcore.AddSync(os.Stdout)
-	encoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+
+	loggerConfig := zap.NewProductionConfig()
+	loggerConfig.EncoderConfig.TimeKey = "timestamp"
+	loggerConfig.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(time.Layout)
+	encoder := zapcore.NewJSONEncoder(loggerConfig.EncoderConfig)
 
 	core := zapcore.NewCore(encoder, writerSyncer, loglevel)
 

@@ -27,7 +27,7 @@ jobs:
       - name: Linters
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.41.1
+          version: latest
           working-directory: ${{ env.BRANCH }}
 
   tests:

@@ -24,12 +24,13 @@ const _ = grpc.SupportPackageIsVersion7
 type EventServiceClient interface {
 	CreateEvent(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Event, error)
 	UpdateEvent(ctx context.Context, in *Event, opts ...grpc.CallOption) (*Event, error)
-	DeleteEvent(ctx context.Context, in *UID, opts ...grpc.CallOption) (*Response, error)
+	DeleteEvent(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Response, error)
 	GetDailyEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
 	GetWeeklyEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
 	GetMonthlyEvents(ctx context.Context, in *GetEventsRequest, opts ...grpc.CallOption) (*GetEventsResponse, error)
 	GetNotificationEvents(ctx context.Context, in *Time, opts ...grpc.CallOption) (*GetEventsResponse, error)
 	DeleteOldEvents(ctx context.Context, in *Time, opts ...grpc.CallOption) (*Response, error)
+	DeleteByUserID(ctx context.Context, in *UID, opts ...grpc.CallOption) (*Response, error)
 }
 
 type eventServiceClient struct {
@@ -58,7 +59,7 @@ func (c *eventServiceClient) UpdateEvent(ctx context.Context, in *Event, opts ..
 	return out, nil
 }
 
-func (c *eventServiceClient) DeleteEvent(ctx context.Context, in *UID, opts ...grpc.CallOption) (*Response, error) {
+func (c *eventServiceClient) DeleteEvent(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Response, error) {
 	out := new(Response)
 	err := c.cc.Invoke(ctx, "/event.EventService/DeleteEvent", in, out, opts...)
 	if err != nil {
@@ -112,18 +113,28 @@ func (c *eventServiceClient) DeleteOldEvents(ctx context.Context, in *Time, opts
 	return out, nil
 }
 
+func (c *eventServiceClient) DeleteByUserID(ctx context.Context, in *UID, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/event.EventService/DeleteByUserID", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // EventServiceServer is the server API for EventService service.
 // All implementations must embed UnimplementedEventServiceServer
 // for forward compatibility
 type EventServiceServer interface {
 	CreateEvent(context.Context, *Event) (*Event, error)
 	UpdateEvent(context.Context, *Event) (*Event, error)
-	DeleteEvent(context.Context, *UID) (*Response, error)
+	DeleteEvent(context.Context, *ID) (*Response, error)
 	GetDailyEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
 	GetWeeklyEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
 	GetMonthlyEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error)
 	GetNotificationEvents(context.Context, *Time) (*GetEventsResponse, error)
 	DeleteOldEvents(context.Context, *Time) (*Response, error)
+	DeleteByUserID(context.Context, *UID) (*Response, error)
 	mustEmbedUnimplementedEventServiceServer()
 }
 
@@ -137,7 +148,7 @@ func (UnimplementedEventServiceServer) CreateEvent(context.Context, *Event) (*Ev
 func (UnimplementedEventServiceServer) UpdateEvent(context.Context, *Event) (*Event, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateEvent not implemented")
 }
-func (UnimplementedEventServiceServer) DeleteEvent(context.Context, *UID) (*Response, error) {
+func (UnimplementedEventServiceServer) DeleteEvent(context.Context, *ID) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteEvent not implemented")
 }
 func (UnimplementedEventServiceServer) GetDailyEvents(context.Context, *GetEventsRequest) (*GetEventsResponse, error) {
@@ -154,6 +165,9 @@ func (UnimplementedEventServiceServer) GetNotificationEvents(context.Context, *T
 }
 func (UnimplementedEventServiceServer) DeleteOldEvents(context.Context, *Time) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteOldEvents not implemented")
+}
+func (UnimplementedEventServiceServer) DeleteByUserID(context.Context, *UID) (*Response, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteByUserID not implemented")
 }
 func (UnimplementedEventServiceServer) mustEmbedUnimplementedEventServiceServer() {}
 
@@ -205,7 +219,7 @@ func _EventService_UpdateEvent_Handler(srv interface{}, ctx context.Context, dec
 }
 
 func _EventService_DeleteEvent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UID)
+	in := new(ID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -217,7 +231,7 @@ func _EventService_DeleteEvent_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/event.EventService/DeleteEvent",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EventServiceServer).DeleteEvent(ctx, req.(*UID))
+		return srv.(EventServiceServer).DeleteEvent(ctx, req.(*ID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -312,6 +326,24 @@ func _EventService_DeleteOldEvents_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _EventService_DeleteByUserID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EventServiceServer).DeleteByUserID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/event.EventService/DeleteByUserID",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EventServiceServer).DeleteByUserID(ctx, req.(*UID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // EventService_ServiceDesc is the grpc.ServiceDesc for EventService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -350,6 +382,10 @@ var EventService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteOldEvents",
 			Handler:    _EventService_DeleteOldEvents_Handler,
+		},
+		{
+			MethodName: "DeleteByUserID",
+			Handler:    _EventService_DeleteByUserID_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

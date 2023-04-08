@@ -2,11 +2,11 @@ package httpserver
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"net/http"
 	"time"
 
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/config"
+	"go.uber.org/zap"
 )
 
 const (
@@ -43,7 +43,7 @@ func New(handler http.Handler, conf config.HTTP, logg *zap.SugaredLogger) *Serve
 
 func (s *Server) Start() {
 	go func() {
-		s.notify <- http.ListenAndServe(s.server.Addr, loggingMiddleware(s.server.Handler, &s.logger))
+		s.notify <- s.server.ListenAndServe()
 		close(s.notify)
 	}()
 }

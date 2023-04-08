@@ -5,6 +5,10 @@ run:
     - !bench
 
 linters-settings:
+  lll:
+    line-length: 160
+  godot:
+    period: false
   funlen:
     lines: 150
     statements: 80

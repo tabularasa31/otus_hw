@@ -1,16 +1,16 @@
+//nolint:dupl
 package v1
 
 import (
-	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
-	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	errapp "github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/controller/repo"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/entity"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
+	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/utils/dateconv"
+	"go.uber.org/zap"
 )
 
 type calendarRoutes struct {
@@ -29,6 +29,7 @@ func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l zap.S
 		h.GET("/daily", r.daily)
 		h.GET("/weekly", r.weekly)
 		h.GET("/monthly", r.monthly)
+		h.DELETE("/deletebyuid/:uid", r.deletebyuid)
 	}
 }
 
@@ -46,15 +47,22 @@ func newCalendarRoutes(handler *gin.RouterGroup, u usecase.EventUseCase, l zap.S
 func (r *calendarRoutes) create(c *gin.Context) {
 	var req entity.Event
 	if err := c.ShouldBindJSON(&req); err != nil {
-		r.l.Error(err, "http - v1 - create")
+		r.l.Error(err, " -- http - v1 - create")
 		errorResponse(c, http.StatusBadRequest, "invalid request body")
+		return
+	}
 
+	if req.UserID == 0 {
+		errorResponse(c, http.StatusBadRequest, "empty event user id")
+		return
+	} else if req.StartTime == "" || req.EndTime == "" {
+		errorResponse(c, http.StatusBadRequest, "empty event time")
 		return
 	}
 
 	result, err := r.u.Create(
 		c.Request.Context(),
-		entity.Event{
+		&entity.Event{
 			Title:        req.Title,
 			Desc:         req.Desc,
 			UserID:       req.UserID,
@@ -64,13 +72,8 @@ func (r *calendarRoutes) create(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		if err == errapp.ErrEventTimeBusy {
-			r.l.Error("http - v1 - create - ErrEventTimeBusy")
-			errorResponse(c, http.StatusUnprocessableEntity, "this event time is already busy")
-		} else {
-			r.l.Error(err, "http - v1 - create")
-			errorResponse(c, http.StatusInternalServerError, "event creating problems")
-		}
+		r.l.Error(err, " -- http - v1 - create")
+		errorResponse(c, http.StatusInternalServerError, "event creating problems")
 		return
 	}
 
@@ -93,7 +96,6 @@ func (r *calendarRoutes) update(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		r.l.Error(err, "http - v1 - update")
 		errorResponse(c, http.StatusBadRequest, "invalid request body")
-
 		return
 	}
 
@@ -110,13 +112,8 @@ func (r *calendarRoutes) update(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		if err == errapp.ErrEventTimeBusy {
-			r.l.Error("http - v1 - update - ErrEventTimeBusy")
-			errorResponse(c, http.StatusUnprocessableEntity, "this event time is already busy")
-		} else {
-			r.l.Error(err, "http - v1 - update")
-			errorResponse(c, http.StatusInternalServerError, "event updating problems")
-		}
+		r.l.Error(err, "http - v1 - update")
+		errorResponse(c, http.StatusInternalServerError, "event updating problems")
 		return
 	}
 
@@ -279,4 +276,32 @@ func (r *calendarRoutes) monthly(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, eventsResponse{result})
+}
+
+// @Summary		Delete by uid
+// @Description	Delete events by user_id
+// @ID				deletebyuid
+// @Tags			event
+// @Accept			plain
+// @Produce		plain
+// @Success		200	{string}	string	"Deleted Success"
+// @Failure		400	{object}	response
+// @Failure		500	{object}	response
+// @Router			/event/delete [delete]
+func (r *calendarRoutes) deletebyuid(c *gin.Context) {
+	param := c.Param("uid")
+	uid, e := strconv.Atoi(param)
+	if e != nil {
+		errorResponse(c, http.StatusBadRequest, "param user ID not int")
+	}
+
+	err := r.u.DeleteByUID(c.Request.Context(), uid)
+	if err != nil {
+		r.l.Error(err, "http - v1 - deletebyuid")
+		errorResponse(c, http.StatusInternalServerError, "event deleting by uid problems")
+
+		return
+	}
+
+	c.String(http.StatusOK, "Deleted Success")
 }

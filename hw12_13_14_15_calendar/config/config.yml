@@ -1,11 +1,11 @@
 logger:
-  level: INFO
+  level: 'info'  #("debug", "info", "warn", "error", "dpanic", "panic", "fatal")
 storage:
   type: postgres
 http:
-  addr: 'localhost:8080'
+  addr: ':8080'
 grpc:
-  addr: 'localhost:50051'
+  addr: ':50051'
 postgres:
-  dsn: 'postgres://postgres:passpass@localhost:5432/calendarDB'
-  pool_max: 2
+  dsn: 'postgres://postgres:passpass@localhost:5432/postgres?sslmode=disable'
+  poolMax: 2

@@ -1,15 +1,14 @@
 package v1
 
 import (
-	"go.uber.org/zap"
 	"net/http"
-
-	"github.com/swaggo/swag/example/basic/docs"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/swag/example/basic/docs"
 	"github.com/tabularasa31/hw_otus/hw12_13_14_15_calendar/internal/usecase"
+	"go.uber.org/zap"
 )
 
 // NewRouter -.

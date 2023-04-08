@@ -5,9 +5,9 @@ type (
 		ID           int    `json:"id"`
 		Title        string `json:"title"`
 		Desc         string `json:"desc"`
-		UserID       int    `json:"user_id"`
-		StartTime    string `json:"start_time"`
-		EndTime      string `json:"end_time"`
+		UserID       int    `json:"userId"`
+		StartTime    string `json:"startTime"`
+		EndTime      string `json:"endTime"`
 		Notification string `json:"notification"`
 	}
 )

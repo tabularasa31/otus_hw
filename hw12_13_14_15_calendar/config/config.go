@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
-	val "github.com/go-playground/validator/v10"
 
+	val "github.com/go-playground/validator/v10"
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
@@ -33,8 +33,8 @@ type (
 	}
 
 	Postgres struct {
-		Dsn     string `yaml:"dsn"`
-		PoolMax int    `yaml:"pool_max" env:"PG_POOL_MAX"`
+		Dsn     string `yaml:"dsn" env:"DSN"`
+		PoolMax int    `yaml:"poolMax" env:"PG_POOL_MAX"`
 	}
 
 	SchedulerConf struct {
@@ -43,16 +43,16 @@ type (
 	}
 
 	Scheduler struct {
-		DeletePeriod int `yaml:"delete_period"`
+		DeletePeriod int `yaml:"deletePeriod"`
 	}
 
 	AMQPConfig struct {
 		Addr         string `yaml:"addr"`
 		Exchange     string `yaml:"exchange"`
-		ExchangeType string `yaml:"exchange_type"`
+		ExchangeType string `yaml:"exchangeType"`
 		Queue        string `yaml:"queue"`
-		ConsumerTag  string `yaml:"consumer_tag"`
-		BindingKey   string `yaml:"binding_key"`
+		ConsumerTag  string `yaml:"consumerTag"`
+		BindingKey   string `yaml:"bindingKey"`
 		Reliable     string `yaml:"reliable"`
 		Persistent   string `yaml:"persistent"`
 	}
@@ -62,8 +62,7 @@ type (
 		AMQPConfig `yaml:"rabbitmq"`
 	}
 
-	Sender struct {
-	}
+	Sender struct{}
 )
 
 // NewConfig returns app config.
